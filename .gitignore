@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+data/*.db
+*.log
+.DS_Store
+
+DEMO_RUNBOOK.md
+data/credentials.json
