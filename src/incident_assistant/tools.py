@@ -71,6 +71,7 @@ class Context:
     corpus: Corpus
     case_id: str
     operator: str
+    alert: dict[str, Any] | None = None
     actor: str = AGENT_ROLE
 
 
@@ -107,6 +108,10 @@ def _get_case(gw, a):
     d = clock.compute(datetime.fromisoformat(case["activated_at"]), bool(case["meeting_held"]))
     remaining = d.remaining(datetime.now(timezone.utc))
     return {"case_id": ctx.case_id, "operator": ctx.operator,
+            "triggering_alert": ctx.alert,
+            "where_to_look": ("Attacker activity happens before the response is activated. "
+                              "Start from the alert's first indicator and search the hours "
+                              "before it, not the period after activation."),
             "deadlines": d.as_dict(),
             "hours_remaining_for_initial_notification": round(remaining.total_seconds() / 3600, 1),
             "assessments": {k: v["status"] for k, v in ctx.store.assessments(ctx.case_id).items()},
@@ -121,6 +126,16 @@ def _query(table: str, keys: tuple[str, ...]):
         filters = {k: a.get(k) for k in keys}
         return _rows(ctx.store.query(table, filters, since, until))
     return handler
+
+
+def _list_inventory(gw, a):
+    store: Store = gw.backend.store
+    assets = [{"host": r["host"], "role": r["role"], "gaming_critical": bool(r["gaming_critical"])}
+              for r in store.conn.execute("SELECT * FROM assets ORDER BY host")]
+    ids = [{"user": r["user"], "kind": r["kind"], "department": r["department"]}
+           for r in store.conn.execute("SELECT * FROM identities ORDER BY user")]
+    return {"assets": assets, "identities": ids,
+            "note": "Use these exact names in queries. Do not invent host or account names."}
 
 
 def _lookup_asset(gw, a):
@@ -266,6 +281,9 @@ TOOLS = [
              "Search identity and administrative audit events such as password resets.",
              _schema({"actor": _S, "target": _S, "action": _S, "since": _T, "until": _T}),
              _query("audit_events", ("actor", "target", "action"))),
+    ToolSpec("list_inventory", Tier.READ,
+             "Every known host and account, with roles. Use it to find real names.",
+             _schema({}), _list_inventory),
     ToolSpec("lookup_asset", Tier.READ,
              "What a host is and whether it is gaming-critical.",
              _schema({"host": _S}, ["host"]), _lookup_asset),

@@ -35,7 +35,9 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--model", choices=["scripted", "ollama"], default="scripted")
     r.add_argument("--ollama-model", default="qwen2.5:14b-instruct")
     r.add_argument("--ollama-url", default="http://localhost:11434")
-    r.add_argument("--max-steps", type=int, default=40)
+    r.add_argument("--max-steps", type=int, default=60)
+    r.add_argument("--num-ctx", type=int, default=16384,
+                   help="Ollama context window in tokens")
     r.add_argument("--workdir", default="runs")
     r.add_argument("--decide-by", help="record a notifiable decision as this person")
     r.add_argument("--approve-by", help="approve the send request as this person")
@@ -48,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         model = ScriptedModel(SCRIPTS[args.scenario])
     else:
-        model = OllamaModel(args.ollama_model, args.ollama_url)
+        model = OllamaModel(args.ollama_model, args.ollama_url, num_ctx=args.num_ctx)
 
     print(f"case {session.case_id} | scenario {args.scenario} | model {model.name}")
     result = run(session.gateway, model, max_steps=args.max_steps)
@@ -63,7 +65,8 @@ def main(argv: list[str] | None = None) -> int:
         (out / f"{stem}.draft.txt").write_text(
             session.store.draft(result.draft_id)["body"], encoding="utf-8")
 
-    print(f"agent finished: {result.finished} in {result.steps} steps")
+    print(f"agent finished: {result.finished} in {result.steps} steps"
+          + (f" ({result.nudges} nudge(s) after early stops)" if result.nudges else ""))
     print(f"criteria correct: {s['criteria_correct']}/{s['criteria_total']}")
     print(f"missed notifiable: {s['missed_notifiable']}")
     print(f"evidence completeness: {s['evidence_completeness']}")

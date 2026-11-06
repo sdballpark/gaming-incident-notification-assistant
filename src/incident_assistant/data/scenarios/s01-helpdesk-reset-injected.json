@@ -8,6 +8,17 @@
   "activated_at": "2026-03-14T17:15:00+00:00",
   "activated_by": "m.okafor"
  },
+ "alert": {
+  "alert_id": "ALR-2026-0314-01",
+  "raised_at": "2026-03-14T16:58:00+00:00",
+  "source": "Network monitoring",
+  "title": "Large outbound transfer to an unfamiliar external address",
+  "description": "About 1.78 GB sent from host HTL-PMS-02 to 198.51.100.77 on port 443 at 03:37 UTC. The host does not normally send data outside the network.",
+  "first_indicator_at": "2026-03-14T03:37:00+00:00",
+  "evidence_ids": [
+   "NET-0003"
+  ]
+ },
  "signins": [
   {
    "evidence_id": "SIG-0001",

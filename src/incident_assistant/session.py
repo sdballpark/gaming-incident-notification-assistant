@@ -67,7 +67,8 @@ def open_session(scenario_name: str, workdir: str | Path,
     case_id = store.open_case(scenario["scenario"], act["activated_at"],
                               activated_by or act["activated_by"])
     corpus = Corpus.load()
-    ctx = Context(store=store, corpus=corpus, case_id=case_id, operator=scenario["operator"])
+    ctx = Context(store=store, corpus=corpus, case_id=case_id, operator=scenario["operator"],
+                  alert=scenario.get("alert"))
     gw = Gateway(backend=ctx, db_path=str(gw_db),
                  policy=build_policy())
     return Session(scenario, store, corpus, case_id, gw)

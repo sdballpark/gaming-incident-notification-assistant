@@ -142,9 +142,45 @@ def test_ollama_adapter_parses_tool_calls_without_a_server():
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
         assert body["tools"][0]["function"]["name"] == "get_case"
+        assert body["options"]["num_ctx"] == 16384
         return httpx.Response(200, json={"message": {"content": "", "tool_calls": [
             {"function": {"name": "get_case", "arguments": {}}}]}})
     model = OllamaModel(client=httpx.Client(transport=httpx.MockTransport(handler)))
     turn = model.respond([{"role": "user", "content": "go"}],
                          [{"name": "get_case", "description": "d", "inputSchema": {}}])
     assert turn.tool_calls[0].name == "get_case"
+
+
+# ------------------------------------------------------------------ what the model is given
+
+def test_case_opens_with_its_triggering_alert(session):
+    r = call(session, "get_case", {})["result"]
+    assert r["triggering_alert"]["evidence_ids"] == ["NET-0003"]
+    assert "before" in r["where_to_look"]
+
+
+def test_inventory_lists_real_names(session):
+    r = call(session, "list_inventory", {})["result"]
+    assert "HTL-PMS-02" in {a["host"] for a in r["assets"]}
+    assert "svc_loyalty_sync" in {i["user"] for i in r["identities"]}
+
+
+class _StopsEarly:
+    """Answers in text twice, then makes a call, then stops for good."""
+    name = "stops-early"
+
+    def __init__(self):
+        self.turns = 0
+
+    def respond(self, messages, tools):
+        from incident_assistant.agent import ModelTurn, ToolCall
+        self.turns += 1
+        if self.turns == 3:
+            return ModelTurn(tool_calls=[ToolCall("get_case", {})])
+        return ModelTurn(content="I would now call query_network_flows.")
+
+
+def test_early_stop_is_nudged_then_fails_without_a_draft(session):
+    result = run(session.gateway, _StopsEarly(), max_nudges=3)
+    assert result.nudges == 3
+    assert result.finished is False and result.draft_id is None

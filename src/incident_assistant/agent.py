@@ -29,9 +29,15 @@ SYSTEM_PROMPT = """You are assisting a casino's incident response team under Nev
 Commission Regulation 5.260. Your job is to investigate and to draft. You do not decide \
 whether the incident is notifiable, and you cannot send anything.
 
+Respond in English. Act only through tool calls until a valid draft is saved; never \
+describe a tool call in text instead of making it.
+
 Work in this order:
-1. Call get_case to see the deadlines and the criteria to assess.
-2. Investigate with the query and lookup tools. Follow what each result shows: an \
+1. Call get_case for the triggering alert, the deadlines and the criteria to assess. \
+Then call list_inventory for the real host and account names. Never invent names.
+2. Investigate with the query and lookup tools, starting from the alert. Attacker \
+activity happens before the response is activated, so search the hours before the \
+alert's first indicator. Follow what each result shows: an \
 unusual sign-in leads to that user's activity, a host leads to what it connected to, \
 a database host leads to what data it holds.
 3. Record each established fact with add_timeline_entry, citing the evidence IDs.
@@ -99,16 +105,21 @@ class ScriptedModel:
 class OllamaModel:
     def __init__(self, model: str = "qwen2.5:14b-instruct",
                  url: str = "http://localhost:11434", timeout: float = 300.0,
-                 client: httpx.Client | None = None):
+                 client: httpx.Client | None = None, num_ctx: int = 16384):
         self.name = f"ollama:{model}"
         self.model = model
         self.url = url.rstrip("/")
+        # Ollama's default context window is a few thousand tokens. The system prompt,
+        # tool schemas and accumulating tool results exceed it within a few steps, and
+        # Ollama truncates from the start: the instructions go first. The first model
+        # run lost its instructions this way and finished in another language.
+        self.num_ctx = num_ctx
         self.client = client or httpx.Client(timeout=timeout)
 
     def respond(self, messages, tools) -> ModelTurn:
         r = self.client.post(f"{self.url}/api/chat", json={
             "model": self.model, "messages": messages, "stream": False,
-            "options": {"temperature": 0, "seed": 7},
+            "options": {"temperature": 0, "seed": 7, "num_ctx": self.num_ctx},
             "tools": [{"type": "function", "function": {
                 "name": t["name"], "description": t["description"],
                 "parameters": t["inputSchema"]}} for t in tools],
@@ -137,10 +148,22 @@ class RunResult:
     transcript: list[dict[str, Any]]
     draft_id: str | None
     approval_id: str | None
+    nudges: int = 0
 
 
-def run(gateway, model: Model, max_steps: int = 40,
+NUDGE = ("No valid draft has been saved yet, so the work is not finished. Continue with "
+         "tool calls. Do not describe a call in text; make it.")
+
+
+def run(gateway, model: Model, max_steps: int = 40, max_nudges: int = 3,
         client_id: str = "incident-assistant") -> RunResult:
+    """Drive the model until it finishes, hits the step limit, or stops early too often.
+
+    A text-only reply before a valid draft exists is treated as an early stop, not a
+    finish: the model is told so and continues, up to max_nudges times. Nudges are
+    counted in the result, because a run that needed them is weaker than one that
+    did not.
+    """
     tools = gateway.list_tools(AGENT_ROLE)
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": SYSTEM_PROMPT},
@@ -148,13 +171,20 @@ def run(gateway, model: Model, max_steps: int = 40,
     ]
     transcript: list[dict[str, Any]] = []
     draft_id = approval_id = None
+    nudges = 0
 
     for step in range(1, max_steps + 1):
         turn = model.respond(messages, tools)
         if not turn.tool_calls:
+            if draft_id is None and nudges < max_nudges:
+                nudges += 1
+                transcript.append({"step": step, "nudge": nudges, "said": turn.content})
+                messages.append({"role": "assistant", "content": turn.content})
+                messages.append({"role": "user", "content": NUDGE})
+                continue
             transcript.append({"step": step, "final": turn.content})
-            return RunResult(model.name, step, True, turn.content, transcript,
-                             draft_id, approval_id)
+            return RunResult(model.name, step, draft_id is not None, turn.content,
+                             transcript, draft_id, approval_id, nudges)
         messages.append({"role": "assistant", "content": turn.content,
                          "tool_calls": [{"function": {"name": c.name, "arguments": c.arguments}}
                                         for c in turn.tool_calls]})
@@ -171,4 +201,4 @@ def run(gateway, model: Model, max_steps: int = 40,
                              "content": DATA_NOTICE + "\n" + json.dumps(result, default=str)})
 
     return RunResult(model.name, max_steps, False, "step limit reached", transcript,
-                     draft_id, approval_id)
+                     draft_id, approval_id, nudges)
