@@ -1,0 +1,138 @@
+{
+ "source": {
+  "title": "Nevada Gaming Commission Regulation 5.260, as amended",
+  "adopted": "2026-01-29",
+  "effective": "2026-01-29",
+  "url": "https://www.gaming.nv.gov/siteassets/content/divisions/administration/history/regulation-5.260-adp-01.29.2026-eff-01.29.2026.pdf",
+  "pdf_sha256": "6ace105ef55e56c5d8c3f88149ca5275b31a9d7c12619d502df2a390cccf8ab0",
+  "extracted_text_sha256": "40c7fc89ff8ecb3dabb79c047bd5cd9c7da323705bc6e2b345e862978b075fdf",
+  "extraction": "pypdf; deleted [bracketed] text removed; private-use glyphs removed; word-break fixes listed in scripts/build_corpus.py"
+ },
+ "sections": [
+  {
+   "id": "1",
+   "title": "Policy",
+   "text": "1. In accordance with the public policy of the State set forth in NRS 463.0129 and the requirements set forth in chapter 603A of NRS, it is critical that gaming operators take all appropriate steps to secure and protect their information systems from the ongoing threat of cybersecurity incidents. Gaming operators must not only secure and protect their own records and operations, but also the personal information of their patrons and employees as defined in NRS 603A.040."
+  },
+  {
+   "id": "2",
+   "title": "Definitions",
+   "text": "2. Definitions. As used in this section:"
+  },
+  {
+   "id": "2(a)",
+   "title": "Definition: Board",
+   "text": "(a) “Board” has the meaning ascribed to it in NRS 463.0137."
+  },
+  {
+   "id": "2(b)",
+   "title": "Definition: Chair",
+   "text": "(b) “Chair” means the Chair of the Board or the Chair’s designee."
+  },
+  {
+   "id": "2(c)",
+   "title": "Definition: Cybersecurity",
+   "text": "(c) “Cybersecurity” means the process of protecting an information system by preventing, detecting, and responding to cybersecurity incidents."
+  },
+  {
+   "id": "2(d)",
+   "title": "Definition: Cybersecurity incident",
+   "text": "(d) “Cybersecurity incident” means any act in which a person has gained unauthorized access to an information system of a covered entity for the purpose of disrupting, disabling, destroying, or controlling the system or destroying or gaining access to the information contained therein."
+  },
+  {
+   "id": "2(e)",
+   "title": "Definition: Cybersecurity incident response plan",
+   "text": "(e) “Cybersecurity incident response plan” means the documented strategy and procedures implemented by a covered entity to prepare for, detect, respond to, and recover from a cybersecurity incident. This plan shall be based on the best practices developed by a covered entity pursuant to subsection 3."
+  },
+  {
+   "id": "2(f)",
+   "title": "Definition: Covered entity",
+   "text": "(f) “Covered entity” means an entity required to comply with the requirements of this section. Each of the following qualifies as a covered entity: (1) Holder of a nonrestricted license as defined in NRS 463.0177 who deals, operates, carries on, conducts, maintains, or exposes for play any game defined in NRS 463.0152; (2) Holder of a gaming license that allows for the operation of a race book; (3) Holder of a gaming license that allows for the operation of a sports pool; and (4) Holder of a gaming license that permits the operation of interactive gaming."
+  },
+  {
+   "id": "2(g)",
+   "title": "Definition: Information system",
+   "text": "(g) “Information system” means a set of resources organized for the collection, processing, maintenance, use, sharing, dissemination, or disposition of information. Elements of an information system include, without limit, hardware, software, information, data, applications, communications, and people."
+  },
+  {
+   "id": "2(h)",
+   "title": "Definition: Risk assessment",
+   "text": "(h) “Risk assessment” means the process of identifying, estimating, and prioritizing risks to organizational operations and assets resulting from the operation of an information system. Guidance for conducting a risk assessment can be found in the Framework for Improving Critical Infrastructure Cybersecurity, version 1.1 or later, published by NIST."
+  },
+  {
+   "id": "3",
+   "title": "Risk assessment and cybersecurity best practices",
+   "text": "3. Except as otherwise provided herein, a covered entity shall perform an initial risk assessment of its business operation and develop the cybersecurity best practices it deems appropriate. After performing the initial risk assessment, the covered entity shall continue to monitor and evaluate cybersecurity risks to its business operation on an ongoing basis and shall modify its cybersecurity best practices and risk assessments as it deems appropriate. The risk assessment and ongoing monitoring and evaluation required pursuant to this subsection may be performed by an affiliate of the covered entity or a third-party with expertise in the field of cybersecurity. Examples of cybersecurity best practices include, without limit, CIS Version 8, COBIT 5, ISO/IEC 27001, and NIST SP 800-53, or later versions thereof. Covered entities shall fully comply with this subsection within 90 days of being licensed."
+  },
+  {
+   "id": "4",
+   "title": "Reporting obligations after a cybersecurity incident",
+   "text": "4. A covered entity that experiences a cybersecurity incident relating to its information system that has resulted in a material loss of control, compromise, unauthorized disclosure of data or information, or any other similar occurrence shall:"
+  },
+  {
+   "id": "4(a)",
+   "title": "Initial notification to the Chair within 24 hours",
+   "text": "(a) Notify the Chair of the cybersecurity incident as soon as practicable but no later than 24 hours after activating the response procedures set forth in its cybersecurity incident response plan."
+  },
+  {
+   "id": "4(b)",
+   "title": "Initial Cybersecurity Incident Response report",
+   "text": "(b) Complete and submit an Initial Cybersecurity Incident Response report within 5 calendar days after activating the response procedures set forth in its cybersecurity incident response plan using the form provided by the Board. In lieu of this written report, a covered entity may request a meeting with the Chair to be held within the 5- calendar day period referenced herein to provide information on the cybersecurity incident. If such a meeting is held, the covered entity shall complete and submit an Initial Cybersecurity Incident Response form no later than 30 days from the date the covered entity activated the response procedures set forth in its cybersecurity incident response plan."
+  },
+  {
+   "id": "4(c)",
+   "title": "Written status updates every 30 days",
+   "text": "(c) Provide the Board with written updates regarding the cybersecurity incident every 30 days from the initial reporting until the cybersecurity incident is fully resolved and documented."
+  },
+  {
+   "id": "4(d)",
+   "title": "Information on request",
+   "text": "(d) Upon request, provide the Board with specific information regarding the cybersecurity incident;"
+  },
+  {
+   "id": "4(e)",
+   "title": "Investigation report",
+   "text": "(e) Perform, or have a third-party perform, an investigation into the cybersecurity incident, prepare a report documenting the results of the investigation, notify the Board of the completion of the report, and make the report available to the Board for review upon request. The report must include, without limit, the root cause of the cybersecurity incident, the extent of the cybersecurity incident, and any actions taken or planned to be taken to prevent similar cybersecurity incidents from occurring in the future; and"
+  },
+  {
+   "id": "4(f)",
+   "title": "External investigations",
+   "text": "(f) Notify the Board when any investigation or similar action taken by an entity external to the covered entity is completed and make the results of such investigation or similar action available to the Board upon request."
+  },
+  {
+   "id": "4(waiver)",
+   "title": "Waiver or modification of reporting requirements",
+   "text": "The Chair, in the Chair’s sole and absolute discretion, may waive or modify the reporting requirements set forth in this subsection upon the receipt of a written request from the covered entity. A request for a waiver or modification must be submitted by the covered entity prior to any deadline related to the relevant reporting requirement. The Chair may condition or limit the waiver or modification in any manner the Chair deems appropriate and may revoke the waiver or modification at any time at the Chair’s sole and absolute discretion."
+  },
+  {
+   "id": "5",
+   "title": "Group I licensees",
+   "text": "5. A covered entity that has been classified as a Group I licensee as defined in subsection 8 of regulation 6.010 shall:"
+  },
+  {
+   "id": "5(a)",
+   "title": "Qualified individual",
+   "text": "(a) Designate a qualified individual to be responsible for developing, implementing, overseeing, and enforcing the covered entity’s cybersecurity best practices and procedures developed pursuant to subsection 3."
+  },
+  {
+   "id": "5(b)",
+   "title": "Annual internal audit",
+   "text": "(b) At least annually, have its internal auditor or other independent entity with expertise in the field of cybersecurity perform and document observations, examinations, and inquiries of employees to verify the covered entity is following the cybersecurity best practices and procedures developed pursuant to subsection 3. A covered entity shall retain all documents prepared by the internal auditor pursuant to this paragraph in accordance with the requirements set forth in subsection 6. The same independent entity utilized under this paragraph may be utilized to perform the procedures set forth in paragraph (c) provided the procedures in this paragraph are performed by different employees."
+  },
+  {
+   "id": "5(c)",
+   "title": "Annual independent review and attestation",
+   "text": "(c) At least annually, engage an independent accountant or other independent entity with expertise in the field of cybersecurity to perform an independent review of the covered entity’s best practices and procedures developed pursuant to subsection 3 and attest in writing that those practices and procedures comply with the requirements of this section. The covered entity shall retain the written attestation, and any related documents provided therewith, in accordance with the requirements set forth in subsection 6. The same independent entity utilized under this paragraph may be utilized to perform the procedures set forth in paragraph (b) provided the procedures in this paragraph are performed by different employees."
+  },
+  {
+   "id": "6",
+   "title": "Documentation and record retention",
+   "text": "6. A covered entity shall document in writing all procedures taken to comply with this section and the results thereof. The covered entity shall retain all records required in this section for a minimum of five years from the date they are created unless the Chair approves otherwise in writing. The covered entity shall provide any record required in this section to the Board upon request."
+  },
+  {
+   "id": "7",
+   "title": "Enforcement",
+   "text": "7. Failure to exercise proper due diligence in compliance with this section shall constitute an unsuitable method of operation and may result in disciplinary action."
+  }
+ ]
+}

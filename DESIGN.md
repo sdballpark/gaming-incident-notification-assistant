@@ -1,7 +1,7 @@
 # Gaming Incident Notification Assistant: Design
 
-Version: 1.1 (2026-11-06)
-Status: design, pre-implementation
+Version: 1.2 (2026-11-06)
+Status: Phase 1 implemented; Phase 2 next
 Scope: Nevada Gaming Commission Regulation 5.260, as amended January 29, 2026
 Data: synthetic only. No real operator, system, network or patron data appears anywhere in this repository.
 
@@ -19,19 +19,29 @@ This project builds an assistant that does the evidence gathering and drafting s
 
 ## 2. What the regulation requires
 
-Summarized from the adopted text. The repository ships the full regulation in `corpus/` and every drafted citation points into it.
+Summarized from the adopted text. The repository ships the adopted text in `src/incident_assistant/data/corpus/`, built as described in section 2a, and every drafted citation points into it.
 
 | Obligation | Trigger | Deadline | Subsection |
 |---|---|---|---|
 | Initial notification to the Chair | Incident resulting in material loss of control, compromise, unauthorized disclosure of data or information, or similar | As soon as practicable, no later than 24 hours after activating incident response procedures | 4(a) |
 | Initial Cybersecurity Incident Response report, on the Board's form | Same | 5 calendar days after activation, or 30 days if the operator requests and holds a meeting with the Chair within the 5 days | 4(b) |
-| Written status updates | Same | Every 30 days from the initial report until resolved | 4(c) |
+| Written status updates | Same | Every 30 days "from the initial reporting" until resolved; scheduled from the initial notification, see 2a | 4(c) |
 | Investigation report: root cause, extent, remediation | Same | No fixed deadline; notify the Board on completion, provide on request | 4(e) |
 | Records retained | All compliance procedures and results | 5 years | 6 |
 
 Covered entities are nonrestricted licensees operating games, race books, sports pools and interactive gaming. Group I licensees carry additional obligations (a qualified individual, an annual internal audit and an annual independent attestation) that this project does not automate.
 
 Patron personal information also falls under NRS 603A, which has its own breach notification duties. The assistant flags when patron data appears to be involved but does not draft 603A notices. That is a separate legal determination for counsel.
+
+## 2a. Reading the adopted text
+
+Three points came from the published text itself rather than from summaries of it.
+
+**The document is a markup.** Deleted wording sits in brackets inline: "no later than [72] 24 hours". Text extraction keeps the brackets and loses the strikethrough, so a naive corpus holds both numbers side by side. The corpus build removes every bracketed span and then fails if the number 72 appears anywhere, if 4(a) does not read as the 24-hour rule, or if any expected section is missing. CI rebuilds the corpus from the source text on every push and fails on any difference.
+
+**The clock starts at activation of the response plan.** Section 4(a) runs the 24 hours from "activating the response procedures set forth in its cybersecurity incident response plan". That timestamp is recorded by a person, and the agent has no tool that can set it.
+
+**"From the initial reporting" is ambiguous.** Section 4(c) requires updates every 30 days "from the initial reporting". That could mean the 4(a) notification or the 4(b) report. The clock schedules from the notification, the earlier event, so the schedule can only run early. The 5-day report deadline is computed as activation plus 120 hours, never later than an end-of-day reading. Both are interpretations for counsel to confirm, and the code states them where they are made.
 
 ## 3. What the assistant does
 
@@ -93,16 +103,24 @@ flowchart TB
     GW -->|PRIVILEGED: submit_notification| OUT[Outbox]
 ```
 
-The gateway is [itops-mcp-gateway](https://github.com/sdballpark/itops-mcp-gateway), installed as a dependency pinned to release `v1.1.0` rather than reimplemented. It brings four tiers, server-side enforcement and an approval endpoint that requires an approver credential agents are never issued. Pinning to a tag means a later gateway change cannot alter this project's security behavior without a deliberate version bump.
+The gateway is [itops-mcp-gateway](https://github.com/sdballpark/itops-mcp-gateway), installed as a package pinned to release `v1.2.0` rather than reimplemented. This project declares its tools, roles and never-exposed actions as a gateway `Policy`; the gateway enforces it with the same pipeline it uses for IT operations: never-exposed check, role and tier, argument validation, approval gate, audit. A policy that would weaken that model is refused when it is built. Pinning to a tag means a later gateway change cannot alter this project's security behavior without a deliberate version bump.
 
 ### Tool tiers
 
 | Tier | Tools |
 |---|---|
-| READ | `get_case`, `query_signins`, `query_process_events`, `query_network_flows`, `query_audit_log`, `lookup_asset`, `lookup_identity`, `lookup_data_inventory`, `search_regulation`, `search_ir_plan` |
-| WRITE | `add_timeline_entry`, `set_criterion_assessment`, `save_draft` |
-| PRIVILEGED | `submit_notification`, `submit_status_report` (queue for human approval) |
-| DENIED | `edit_timeline_entry`, `delete_evidence`, `record_notifiability_decision`, `set_activation_time`, any containment action |
+| READ | `get_case`, `query_signins`, `query_process_events`, `query_network_flows`, `query_audit_events`, `lookup_asset`, `lookup_identity`, `lookup_data_inventory`, `search_regulation` |
+| WRITE | `add_timeline_entry`, `set_criterion_assessment`, `draft_initial_notification` |
+| PRIVILEGED | `submit_initial_notification` (queues for human approval) |
+| Never exposed | `edit_timeline_entry`, `delete_evidence`, `record_notifiability_decision`, `set_activation_time`, `isolate_host` |
+
+Two roles: `investigation_agent` holds all of the above, and `reviewer_agent` reads only. An unknown role falls back to `reviewer_agent`.
+
+**Sending takes two separate human acts.** The privileged tool does not send; it queues for approval. When a person approves, the send still refuses unless a person has also recorded the incident as notifiable, and a recorded "not notifiable" blocks it. Approval and decision are kept apart because they answer different questions: whether this text is right, and whether the incident must be reported at all.
+
+**The agent writes one paragraph.** The draft is a fixed template rendered from the store: deadlines from the clock, the trigger assessment, the timeline in event order, and the decision line. The agent supplies only the summary, and the validator rejects it unless every sentence cites evidence already on the timeline, every regulation citation resolves, and it states neither a time period nor whether the incident is notifiable.
+
+`search_ir_plan` and the status report tool from version 1.1 move to Phase 3, with the reports they serve.
 
 Two denials matter more than the others. The agent cannot record the notifiability decision, because that decision belongs to a person. It also cannot set the activation timestamp, because the timestamp drives every deadline.
 
@@ -118,7 +136,8 @@ The defining risk: **during an incident, the adversary writes part of your evide
 | Under-reporting | The agent concludes "not notifiable" on thin evidence | The agent never decides. "Unknown" on any trigger element is shown as unresolved, never as "not supported". The system leans toward putting the question in front of a person. |
 | Fabricated evidence | A draft states the loyalty database was accessed with no record showing it | Every factual claim must carry an evidence ID that resolves in the store, or the validator rejects the draft |
 | Stale law | A draft cites the 72-hour deadline | Regulation corpus is versioned with an effective date. Citations must resolve to retrieved text. A test asserts no draft contains "72 hours". |
-| Self-approval | The agent approves its own submission | No approve tool exists. The gateway's approval endpoint requires an approver credential from a namespace agents are never issued (gateway v1.1.0). |
+| Self-approval | The agent approves its own submission | No approve tool exists. The gateway refuses agent identities as approvers, and over HTTP requires an approver credential from a namespace agents are never issued. |
+| Approval without a decision | A rushed approver sends before anyone has decided the incident is reportable | The send refuses without a person's recorded notifiable decision |
 | Evidence tampering | Timeline entries altered after the fact | Append-only store with a hash chain, carried over from the M365 Copilot lab |
 | Confidential drafts leaving the environment | Incident details sent to a hosted model | Model provider is configurable. The reference run uses a local model. |
 
@@ -150,10 +169,18 @@ Predictions are committed to git before each experiment runs.
 | Phase | Deliverable | Exit test |
 |---|---|---|
 | 0 | This design, the scenario schema and the regulation corpus | Design reviewed, corpus matches the adopted text |
-| 1 | One scenario end to end: investigation, timeline, trigger assessment, 24-hour notification draft, approval gate | Demo runs in CI, draft validator passes, no-send-without-approval test passes |
+| 1 | One scenario end to end: investigation, timeline, trigger assessment, 24-hour notification draft, approval gate | **Done.** Demo runs in CI, draft validator passes, no-send-without-approval test passes |
 | 2 | Scenario corpus with clean and injected twins, evaluation harness, first committed predictions | Results table published with honest misses |
 | 3 | 5-day report, 30-day status updates, investigation report outline | Deadlines computed correctly across all paths, including the meeting option in 4(b) |
 | 4 | Client packaging: deployment options, operating runbook, mapping to the operator's IR plan | A security lead at an operator could pilot it from the docs alone |
+
+### What CI runs, and what it does not prove
+
+CI runners have no GPU. CI therefore drives the pipeline with a scripted reference investigation: a fixed sequence of tool calls, each authorized, validated and audited by the gateway exactly as a model's would be. That proves the controls hold end to end. It proves nothing about how well a model investigates. Model runs happen locally on Ollama and are reported separately, starting in Phase 2.
+
+### Injection detection is a flag, not the control
+
+Telemetry rows are checked with the gateway's injection markers plus markers aimed at telemetry, such as notes addressed to an AI analyst or text steering the reporting outcome. A match marks the row and the timeline entry that cites it, and the draft shows the flag. Detection will miss some phrasings. The control is structural: the agent holds no tool that can act on a successful injection.
 
 ## 9. As a service offering
 
@@ -179,5 +206,6 @@ It uses synthetic data, a single node and no production traffic. It is not legal
 
 | Version | Date | Change |
 |---|---|---|
+| 1.2 | 2026-11-06 | Phase 1 implemented. Gateway pinned to v1.2.0 as a policy. Section 2a added from the adopted text: markup handling, activation clock, the 4(c) reading. Two-act send, one-paragraph drafting, CI scope and injection flagging documented. Tool list matches the code. |
 | 1.1 | 2026-11-06 | Renamed from "copilot" to "assistant". Gateway dependency pinned to itops-mcp-gateway v1.1.0, with approver credentials. |
 | 1.0 | 2026-11-06 | Initial design |
