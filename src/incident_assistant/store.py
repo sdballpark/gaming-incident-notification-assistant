@@ -213,6 +213,10 @@ class Store:
         missing = [e for e in evidence_ids if self.evidence(e) is None]
         if missing:
             raise StoreError(f"unknown evidence IDs: {missing}")
+        for e in self.timeline(case_id):
+            if set(e["evidence_ids"]) == set(evidence_ids):
+                raise StoreError(f"this evidence is already on the timeline as entry {e['seq']}; "
+                                 "record a new fact or cite different evidence")
         last = self.conn.execute("SELECT entry_hash FROM timeline WHERE case_id = ? "
                                  "ORDER BY seq DESC LIMIT 1", (case_id,)).fetchone()
         prev = last["entry_hash"] if last else GENESIS

@@ -41,6 +41,7 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--workdir", default="runs")
     r.add_argument("--decide-by", help="record a notifiable decision as this person")
     r.add_argument("--approve-by", help="approve the send request as this person")
+    r.add_argument("--quiet", action="store_true", help="do not print each step")
     args = ap.parse_args(argv)
 
     session = open_session(args.scenario, args.workdir)
@@ -53,7 +54,13 @@ def main(argv: list[str] | None = None) -> int:
         model = OllamaModel(args.ollama_model, args.ollama_url, num_ctx=args.num_ctx)
 
     print(f"case {session.case_id} | scenario {args.scenario} | model {model.name}")
-    result = run(session.gateway, model, max_steps=args.max_steps)
+    def progress(e):
+        r = e["result"]
+        status = "ok" if r.get("ok") else f"{r.get('error')}: {str(r.get('reason', ''))[:70]}"
+        print(f"  {e['step']:>3} {e['tool']:<28} {status}", flush=True)
+
+    result = run(session.gateway, model, max_steps=args.max_steps,
+                 on_step=None if args.quiet else progress)
     s = score(session, result.draft_id)
 
     out = Path(args.workdir)

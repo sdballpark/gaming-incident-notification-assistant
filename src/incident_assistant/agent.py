@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 import httpx
 
@@ -178,7 +178,8 @@ NUDGE = ("No valid draft has been saved yet, so the work is not finished. Contin
 
 
 def run(gateway, model: Model, max_steps: int = 40, max_nudges: int = 3,
-        client_id: str = "incident-assistant") -> RunResult:
+        client_id: str = "incident-assistant",
+        on_step: Callable[[dict[str, Any]], None] | None = None) -> RunResult:
     """Drive the model until it finishes, hits the step limit, or stops early too often.
 
     A text-only reply before a valid draft exists is treated as an early stop, not a
@@ -223,8 +224,11 @@ def run(gateway, model: Model, max_steps: int = 40, max_nudges: int = 3,
             approval_id = result.get("approval_id", approval_id)
             if hasattr(model, "observe"):
                 model.observe(result)
-            transcript.append({"step": step, "tool": call.name, "arguments": call.arguments,
-                               "result": result})
+            entry = {"step": step, "tool": call.name, "arguments": call.arguments,
+                     "result": result}
+            transcript.append(entry)
+            if on_step:
+                on_step(entry)
             messages.append({"role": "tool", "name": call.name,
                              "content": DATA_NOTICE + "\n" + json.dumps(result, default=str)})
 

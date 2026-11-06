@@ -29,7 +29,7 @@ from typing import Any
 from itops_mcp_gateway import ClientRole, Policy, Tier, ToolSpec, ValidationError
 from itops_mcp_gateway import neutralize_injection
 
-from . import clock
+from . import absence, clock
 from .corpus import Corpus
 from .drafts import CRITERIA, STATUSES, render_initial_notification, validate_summary
 from .store import Store, StoreError
@@ -175,10 +175,12 @@ def _add_timeline(gw, a):
 
 def _set_assessment(gw, a):
     ctx: Context = gw.backend
+    ids = list(a.get("evidence_ids", []))
     try:
-        ctx.store.set_assessment(ctx.case_id, a["criterion"], a["status"],
-                                 list(a.get("evidence_ids", [])), a["rationale"], ctx.actor)
-    except StoreError as exc:
+        absence.check(ctx.store, ctx.case_id, a["criterion"], a["status"], ids)
+        ctx.store.set_assessment(ctx.case_id, a["criterion"], a["status"], ids,
+                                 a["rationale"], ctx.actor)
+    except (StoreError, absence.AbsenceNotEstablished) as exc:
         raise ValidationError(str(exc)) from exc
     return {"recorded": True, "criterion": a["criterion"], "status": a["status"]}
 
