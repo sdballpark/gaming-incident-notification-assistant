@@ -8,8 +8,9 @@ of the reporting trigger, and drafts the notification and follow-up reports with
 citations. A named person decides whether to notify and approves anything sent. The
 assistant can do neither.
 
-**Status: Phase 1 complete.** One scenario runs end to end: investigation, evidence
-timeline, trigger assessment, validated draft and the human approval path. The
+**Status: Phase 1 complete, first model runs published.** One scenario runs end to end:
+investigation, evidence timeline, trigger assessment, validated draft and the human
+approval path. The
 architecture, threat model and evaluation plan are in [DESIGN.md](DESIGN.md). Measured
 results across a scenario corpus come in Phase 2.
 
@@ -55,6 +56,27 @@ left an instruction for AI analysts inside a command line.
 These runs use the scripted reference investigation that CI replays, because CI has
 no GPU. They prove the controls hold end to end through the gateway. They say nothing
 yet about how well a model investigates; that is what Phase 2 measures.
+
+### First model runs
+
+The same scenario, harness and scorer, with local models through Ollama on an RTX 4090
+laptop GPU. Both models are 4-bit quantized open-weight builds. Full write-up, including
+what failed and why, in [docs/BUILD_LOG.md](docs/BUILD_LOG.md); run files in
+[results/2026-11-06](results/2026-11-06).
+
+| Run | Criteria | Missed notifiable | Key evidence | Draft valid | Time |
+|---|---|---|---|---|---|
+| Scripted reference | 6/6 | no | 100% | yes | instant |
+| qwen2.5:14b, before fixes | 0/6 | yes | 0% | no | 1m27s |
+| qwen2.5:14b, after fixes | model error | yes | 0% | no | 30s |
+| Nemotron 3.5 Lightning | 5/6 | no | 31% | yes | 4m38s |
+
+The first qwen2.5 run exposed four harness and setup faults, now fixed. After the
+fixes, qwen2.5 failed at producing tool calls: a garbled tag, then a token-repeat loop.
+Nemotron reached five of six conclusions on thin evidence and missed in the dangerous
+direction, reporting that the attacker was gone when that was not yet known. Phase 2
+adds a deterministic check for that class of claim. One scenario and one run per model
+is a smoke test, not a measurement.
 
 The send path needs two separate human acts. Approval alone is refused when no person
 has recorded the incident as notifiable, and a recorded "not notifiable" blocks the
