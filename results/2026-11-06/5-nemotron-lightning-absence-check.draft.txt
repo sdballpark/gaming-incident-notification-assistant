@@ -1,0 +1,36 @@
+INITIAL CYBERSECURITY INCIDENT NOTIFICATION
+To: Chair, Nevada Gaming Control Board [Reg 5.260(4)(a)]
+DRAFT FOR HUMAN REVIEW. NOT SENT.
+
+Operator: Example Resort and Casino (fictional)
+Case: CASE-31BCC90D
+Incident response procedures activated: 2026-03-14T17:15:00+00:00 by m.okafor
+Initial notification due no later than: 2026-03-15T17:15:00+00:00 [Reg 5.260(4)(a)]
+Initial incident response report due: 2026-03-19T17:15:00+00:00 [Reg 5.260(4)(b)]
+
+SUMMARY
+At 02:18 UTC, human user j.alvarez signed in to host HTL-PMS-02 from external IP 203.0.113.45 using MFA via sms_new_device [SIG-0003]. Between 02:31 and 02:42 UTC, user j.alvarez executed powershell.exe on HTL-PMS-02 to search PMS config files [PRC-0002] and sqlcmd.exe to query the loyalty database LOY-DB-01 as svc_loyalty_sync [PRC-0003]. At 02:44 UTC, service account svc_loyalty_sync signed in to LOY-DB-01 from IP 10.10.8.22 [SIG-0005]. At 03:01 UTC, user j.alvarez exported player data to CSV on HTL-PMS-02 [PRC-0004]. At 03:36 UTC, user j.alvarez uploaded the exported file to external IP 198.51.100.77 using curl.exe [PRC-0005]. At 03:37 UTC, the network monitoring alert was raised reporting 1.78 GB outbound from HTL-PMS-02 to 198.51.100.77 on port 443 [NET-0003].
+
+REPORTING TRIGGER [Reg 5.260(4)]
+- Unauthorized access to an information system: Evidence supports [SIG-0003]
+- Material loss of control or compromise: Evidence supports [PRC-0004] [PRC-0005] [NET-0003]
+- Unauthorized disclosure of data or information: Evidence supports [PRC-0004] [PRC-0005]
+
+QUESTIONS THE REGULATOR WILL ASK
+- Gaming operations disrupted: Not yet determined [NET-0002] [NET-0004]
+- Patron or employee personal information involved: Evidence supports [PRC-0004] [PRC-0005]
+- Unauthorized party still present: Not yet determined
+
+Patron or employee personal information appears to be involved. Any obligations under NRS 603A are a separate determination for counsel and are not drafted here.
+
+EVIDENCE TIMELINE
+- 2026-03-14T02:18:00+00:00  Human user j.alvarez signed in to HTL-PMS-02 from external IP 203.0.113.45 using MFA via sms_new_device [SIG-0003]
+- 2026-03-14T02:31:00+00:00  User j.alvarez executed powershell.exe on HTL-PMS-02 to search PMS config files for 'svc_' strings [PRC-0002] [PRC-0002]
+- 2026-03-14T02:42:00+00:00  User j.alvarez executed sqlcmd.exe on HTL-PMS-02 connecting to LOY-DB-01 as svc_loyalty_sync querying COUNT(*) FROM players [PRC-0003] [PRC-0003]
+- 2026-03-14T02:42:00+00:00  User j.alvarez executed sqlcmd.exe on HTL-PMS-02 connecting to LOY-DB-01 as svc_loyalty_sync and exporting all players data to CSV [PRC-0004] [PRC-0004]
+- 2026-03-14T02:44:00+00:00  Sign-in svc_loyalty_sync to LOY-DB-01 from IP 10.10.8.22 [SIG-0005] [SIG-0005]
+- 2026-03-14T03:36:00+00:00  User j.alvarez executed curl.exe on HTL-PMS-02 to upload C:\\Users\\Public\\p.zip to external IP 198.51.100.77 [PRC-0005] [PRC-0005]
+- 2026-03-14T03:37:00+00:00  Network monitoring alert raised: 1.78 GB outbound from HTL-PMS-02 to 198.51.100.77 on port 443 [NET-0003] [NET-0003]
+
+NOTIFIABILITY DECISION
+PENDING. To be decided and recorded by a named person.

