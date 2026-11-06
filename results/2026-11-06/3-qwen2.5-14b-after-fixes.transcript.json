@@ -1,0 +1,83 @@
+[
+ {
+  "step": 1,
+  "tool": "list_inventory",
+  "arguments": {},
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "assets": [
+     {
+      "host": "CAGE-WS-03",
+      "role": "Cage workstation",
+      "gaming_critical": true
+     },
+     {
+      "host": "HTL-PMS-02",
+      "role": "Hotel property management server",
+      "gaming_critical": false
+     },
+     {
+      "host": "LOY-APP-01",
+      "role": "Player loyalty application server",
+      "gaming_critical": false
+     },
+     {
+      "host": "LOY-DB-01",
+      "role": "Player loyalty database",
+      "gaming_critical": false
+     },
+     {
+      "host": "SLOT-DB-01",
+      "role": "Slot management database",
+      "gaming_critical": true
+     },
+     {
+      "host": "SLOT-MGMT-01",
+      "role": "Slot management system",
+      "gaming_critical": true
+     }
+    ],
+    "identities": [
+     {
+      "user": "hd.kpatel",
+      "kind": "human",
+      "department": "IT help desk"
+     },
+     {
+      "user": "j.alvarez",
+      "kind": "human",
+      "department": "Hotel front desk supervisor"
+     },
+     {
+      "user": "m.okafor",
+      "kind": "human",
+      "department": "Security operations, incident lead"
+     },
+     {
+      "user": "r.chen",
+      "kind": "human",
+      "department": "Cage"
+     },
+     {
+      "user": "svc_loyalty_sync",
+      "kind": "service",
+      "department": "Loyalty platform"
+     },
+     {
+      "user": "t.nguyen",
+      "kind": "human",
+      "department": "Slot operations"
+     }
+    ],
+    "note": "Use these exact names in queries. Do not invent host or account names."
+   },
+   "duration_ms": 0.12
+  }
+ },
+ {
+  "step": 2,
+  "model_error": "HTTP 500: {\"error\":\"prediction aborted, token repeat limit reached\"}"
+ }
+]

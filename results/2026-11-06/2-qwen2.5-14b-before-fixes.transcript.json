@@ -1,0 +1,225 @@
+[
+ {
+  "step": 1,
+  "tool": "get_case",
+  "arguments": {},
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "case_id": "CASE-885B65FE",
+    "operator": "Example Resort and Casino (fictional)",
+    "deadlines": {
+     "activated_at": "2026-03-14T17:15:00+00:00",
+     "initial_notification_due": "2026-03-15T17:15:00+00:00",
+     "initial_report_due": "2026-03-19T17:15:00+00:00",
+     "meeting_held": false
+    },
+    "hours_remaining_for_initial_notification": -5666.2,
+    "assessments": {},
+    "timeline_entries": 0,
+    "criteria": {
+     "unauthorized_access": "Unauthorized access to an information system",
+     "compromise": "Material loss of control or compromise",
+     "unauthorized_disclosure": "Unauthorized disclosure of data or information",
+     "gaming_operations_disrupted": "Gaming operations disrupted",
+     "personal_information_involved": "Patron or employee personal information involved",
+     "attacker_still_present": "Unauthorized party still present"
+    }
+   },
+   "duration_ms": 0.22
+  }
+ },
+ {
+  "step": 2,
+  "tool": "query_signins",
+  "arguments": {
+   "source_ip": "192.168.1.100",
+   "user": "casino-admin",
+   "since": "2026-03-14T17:15:00+00:00",
+   "until": "2026-03-15T17:15:00+00:00",
+   "host": "casino-db01.example.com"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 0,
+    "rows": []
+   },
+   "duration_ms": 0.18
+  }
+ },
+ {
+  "step": 3,
+  "tool": "query_signins",
+  "arguments": {
+   "host": "casino-db01.example.com",
+   "since": "2026-03-14T17:15:00+00:00",
+   "until": "2026-03-15T17:15:00+00:00",
+   "user": "casino-admin"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 0,
+    "rows": []
+   },
+   "duration_ms": 0.16
+  }
+ },
+ {
+  "step": 4,
+  "tool": "query_signins",
+  "arguments": {
+   "since": "2026-03-14T00:00:00+00:00",
+   "until": "2026-03-15T00:00:00+00:00",
+   "host": "casino-db.example.com",
+   "source_ip": "192.168.1.100",
+   "user": "casino-admin"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 0,
+    "rows": []
+   },
+   "duration_ms": 0.19
+  }
+ },
+ {
+  "step": 5,
+  "tool": "query_audit_events",
+  "arguments": {
+   "action": "password_reset",
+   "since": "2026-03-14T17:15:00+00:00",
+   "until": "2026-03-15T17:15:00+00:00"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 0,
+    "rows": []
+   },
+   "duration_ms": 0.16
+  }
+ },
+ {
+  "step": 6,
+  "tool": "query_network_flows",
+  "arguments": {
+   "since": "2026-03-14T17:15:00+00:00",
+   "until": "2026-03-15T17:15:00+00:00",
+   "src_host": "casino-db01.example.com"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 0,
+    "rows": []
+   },
+   "duration_ms": 0.15
+  }
+ },
+ {
+  "step": 7,
+  "tool": "query_signins",
+  "arguments": {
+   "since": "2026-03-14T17:15:00+00:00",
+   "until": "2026-03-15T17:15:00+00:00",
+   "source_ip": "192.168.1.100"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 0,
+    "rows": []
+   },
+   "duration_ms": 0.12
+  }
+ },
+ {
+  "step": 8,
+  "tool": "query_signins",
+  "arguments": {
+   "since": "2026-03-14T17:15:00+00:00",
+   "until": "2026-03-15T17:15:00+00:00",
+   "user": "unusual_user"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 0,
+    "rows": []
+   },
+   "duration_ms": 0.18
+  }
+ },
+ {
+  "step": 9,
+  "tool": "query_signins",
+  "arguments": {
+   "until": "2026-03-15T00:00:00+00:00",
+   "host": "casino-db01.example.com",
+   "source_ip": "192.168.1.100",
+   "user": "casino-admin",
+   "since": "2026-03-14T00:00:00+00:00"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 0,
+    "rows": []
+   },
+   "duration_ms": 0.13
+  }
+ },
+ {
+  "step": 10,
+  "tool": "query_signins",
+  "arguments": {
+   "source_ip": "192.168.1.100",
+   "since": "2026-03-14T00:00:00+00:00",
+   "until": "2026-03-15T00:00:00+00:00"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 0,
+    "rows": []
+   },
+   "duration_ms": 0.14
+  }
+ },
+ {
+  "step": 11,
+  "tool": "query_signins",
+  "arguments": {
+   "user": "admin",
+   "since": "2026-03-14T00:00:00+00:00",
+   "until": "2026-03-15T00:00:00+00:00",
+   "source_ip": "192.168.1.100"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 0,
+    "rows": []
+   },
+   "duration_ms": 0.35
+  }
+ },
+ {
+  "step": 12,
+  "final": "\u0e08\u0e32\u0e01\u0e01\u0e32\u0e23\u0e04\u0e49\u0e19\u0e2b\u0e32\u0e01\u0e32\u0e23\u0e40\u0e02\u0e49\u0e32\u0e2a\u0e39\u0e48\u0e23\u0e30\u0e1a\u0e1a\u0e1c\u0e48\u0e32\u0e19\u0e1a\u0e31\u0e0d\u0e0a\u0e35\u0e1c\u0e39\u0e49\u0e43\u0e0a\u0e49\u0e17\u0e35\u0e48\u0e44\u0e21\u0e48\u0e1b\u0e01\u0e15\u0e34\u0e43\u0e19\u0e0a\u0e48\u0e27\u0e07\u0e40\u0e27\u0e25\u0e32\u0e17\u0e35\u0e48\u0e44\u0e21\u0e48\u0e1b\u0e01\u0e15\u0e34 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e01\u0e32\u0e23\u0e40\u0e02\u0e49\u0e32\u0e2a\u0e39\u0e48\u0e23\u0e30\u0e1a\u0e1a\u0e43\u0e14\u0e46\n\n\u0e40\u0e19\u0e37\u0e48\u0e2d\u0e07\u0e08\u0e32\u0e01\u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e40\u0e2b\u0e15\u0e38\u0e01\u0e32\u0e23\u0e13\u0e4c\u0e17\u0e35\u0e48\u0e44\u0e21\u0e48\u0e1b\u0e01\u0e15\u0e34\u0e43\u0e19\u0e02\u0e31\u0e49\u0e19\u0e15\u0e2d\u0e19\u0e17\u0e35\u0e48\u0e1c\u0e48\u0e32\u0e19\u0e21\u0e32 \u0e43\u0e2b\u0e49\u0e25\u0e2d\u0e07\u0e15\u0e23\u0e27\u0e08\u0e2a\u0e2d\u0e1a\u0e27\u0e48\u0e32\u0e21\u0e35\u0e01\u0e32\u0e23\u0e40\u0e0a\u0e37\u0e48\u0e2d\u0e21\u0e15\u0e48\u0e2d\u0e40\u0e04\u0e23\u0e37\u0e2d\u0e02\u0e48\u0e32\u0e22\u0e17\u0e35\u0e48\u0e44\u0e21\u0e48\u0e1b\u0e01\u0e15\u0e34\u0e2b\u0e23\u0e37\u0e2d\u0e44\u0e21\u0e48 \u0e40\u0e0a\u0e48\u0e19 \u0e01\u0e32\u0e23\u0e40\u0e0a\u0e37\u0e48\u0e2d\u0e21\u0e15\u0e48\u0e2d\u0e17\u0e35\u0e48\u0e21\u0e35\u0e1b\u0e23\u0e34\u0e21\u0e32\u0e13\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01\u0e17\u0e35\u0e48\u0e2a\u0e39\u0e07\u0e1c\u0e34\u0e14\u0e1b\u0e01\u0e15\u0e34\n\n\u0e40\u0e23\u0e35\u0e22\u0e01\u0e43\u0e0a\u0e49\u0e1f\u0e31\u0e07\u0e01\u0e4c\u0e0a\u0e31\u0e19 `query_network_flows` \u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e04\u0e49\u0e19\u0e2b\u0e32\u0e01\u0e32\u0e23\u0e40\u0e0a\u0e37\u0e48\u0e2d\u0e21\u0e15\u0e48\u0e2d\u0e40\u0e04\u0e23\u0e37\u0e2d\u0e02\u0e48\u0e32\u0e22\u0e17\u0e35\u0e48\u0e21\u0e35\u0e1b\u0e23\u0e34\u0e21\u0e32\u0e13\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01\u0e17\u0e35\u0e48\u0e2a\u0e39\u0e07\u0e1c\u0e34\u0e14\u0e1b\u0e01\u0e15\u0e34\n\n"
+ }
+]

