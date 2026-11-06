@@ -184,3 +184,17 @@ def test_early_stop_is_nudged_then_fails_without_a_draft(session):
     result = run(session.gateway, _StopsEarly(), max_nudges=3)
     assert result.nudges == 3
     assert result.finished is False and result.draft_id is None
+
+
+def test_model_server_error_is_retried_then_recorded_not_raised(session):
+    seeds = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seeds.append(json.loads(request.content)["options"]["seed"])
+        return httpx.Response(500, json={"error": "error parsing tool call"})
+
+    model = OllamaModel(client=httpx.Client(transport=httpx.MockTransport(handler)))
+    result = run(session.gateway, model)
+    assert seeds == [7, 8, 9]
+    assert result.finished is False and result.model_errors == 1
+    assert "error parsing tool call" in result.final_message

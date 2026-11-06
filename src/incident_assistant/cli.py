@@ -57,7 +57,8 @@ def main(argv: list[str] | None = None) -> int:
     s = score(session, result.draft_id)
 
     out = Path(args.workdir)
-    stem = f"{args.scenario}.{args.model}"
+    tag = args.model if args.model == "scripted" else args.ollama_model.replace(":", "_").replace("/", "_")
+    stem = f"{args.scenario}.{tag}"
     (out / f"{stem}.transcript.json").write_text(
         json.dumps(result.transcript, indent=1, default=str), encoding="utf-8")
     (out / f"{stem}.score.json").write_text(json.dumps(s, indent=1), encoding="utf-8")
@@ -67,6 +68,8 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"agent finished: {result.finished} in {result.steps} steps"
           + (f" ({result.nudges} nudge(s) after early stops)" if result.nudges else ""))
+    if result.model_errors:
+        print(f"stopped on a model error after retries: {result.final_message[:200]}")
     print(f"criteria correct: {s['criteria_correct']}/{s['criteria_total']}")
     print(f"missed notifiable: {s['missed_notifiable']}")
     print(f"evidence completeness: {s['evidence_completeness']}")

@@ -66,6 +66,7 @@ class ToolCall:
 class ModelTurn:
     tool_calls: list[ToolCall] = field(default_factory=list)
     content: str = ""
+    error: str | None = None
 
 
 class Model(Protocol):
@@ -105,7 +106,8 @@ class ScriptedModel:
 class OllamaModel:
     def __init__(self, model: str = "qwen2.5:14b-instruct",
                  url: str = "http://localhost:11434", timeout: float = 300.0,
-                 client: httpx.Client | None = None, num_ctx: int = 16384):
+                 client: httpx.Client | None = None, num_ctx: int = 16384,
+                 attempts: int = 3):
         self.name = f"ollama:{model}"
         self.model = model
         self.url = url.rstrip("/")
@@ -114,17 +116,36 @@ class OllamaModel:
         # Ollama truncates from the start: the instructions go first. The first model
         # run lost its instructions this way and finished in another language.
         self.num_ctx = num_ctx
+        self.attempts = attempts
         self.client = client or httpx.Client(timeout=timeout)
 
     def respond(self, messages, tools) -> ModelTurn:
-        r = self.client.post(f"{self.url}/api/chat", json={
+        """One model turn. A server error is retried with a different seed, because
+        Ollama returns 500 when it cannot parse the model's tool-call output, and at
+        temperature 0 the same seed reproduces the same malformed output. If every
+        attempt fails, the turn reports the error instead of raising: a misbehaving
+        model is a result to record, not a reason for the harness to crash."""
+        payload = {
             "model": self.model, "messages": messages, "stream": False,
-            "options": {"temperature": 0, "seed": 7, "num_ctx": self.num_ctx},
             "tools": [{"type": "function", "function": {
                 "name": t["name"], "description": t["description"],
                 "parameters": t["inputSchema"]}} for t in tools],
-        })
-        r.raise_for_status()
+        }
+        last_error = ""
+        for attempt in range(self.attempts):
+            payload["options"] = {"temperature": 0, "seed": 7 + attempt, "num_ctx": self.num_ctx}
+            try:
+                r = self.client.post(f"{self.url}/api/chat", json=payload)
+            except httpx.HTTPError as exc:
+                last_error = f"{type(exc).__name__}: {exc}"
+                continue
+            if r.status_code >= 500:
+                last_error = f"HTTP {r.status_code}: {r.text[:300]}"
+                continue
+            r.raise_for_status()
+            break
+        else:
+            return ModelTurn(error=last_error)
         msg = r.json().get("message", {})
         calls = []
         for c in msg.get("tool_calls") or []:
@@ -149,6 +170,7 @@ class RunResult:
     draft_id: str | None
     approval_id: str | None
     nudges: int = 0
+    model_errors: int = 0
 
 
 NUDGE = ("No valid draft has been saved yet, so the work is not finished. Continue with "
@@ -172,9 +194,15 @@ def run(gateway, model: Model, max_steps: int = 40, max_nudges: int = 3,
     transcript: list[dict[str, Any]] = []
     draft_id = approval_id = None
     nudges = 0
+    model_errors = 0
 
     for step in range(1, max_steps + 1):
         turn = model.respond(messages, tools)
+        if turn.error:
+            model_errors += 1
+            transcript.append({"step": step, "model_error": turn.error})
+            return RunResult(model.name, step, False, "model error: " + turn.error,
+                             transcript, draft_id, approval_id, nudges, model_errors)
         if not turn.tool_calls:
             if draft_id is None and nudges < max_nudges:
                 nudges += 1
@@ -184,7 +212,7 @@ def run(gateway, model: Model, max_steps: int = 40, max_nudges: int = 3,
                 continue
             transcript.append({"step": step, "final": turn.content})
             return RunResult(model.name, step, draft_id is not None, turn.content,
-                             transcript, draft_id, approval_id, nudges)
+                             transcript, draft_id, approval_id, nudges, model_errors)
         messages.append({"role": "assistant", "content": turn.content,
                          "tool_calls": [{"function": {"name": c.name, "arguments": c.arguments}}
                                         for c in turn.tool_calls]})
@@ -201,4 +229,4 @@ def run(gateway, model: Model, max_steps: int = 40, max_nudges: int = 3,
                              "content": DATA_NOTICE + "\n" + json.dumps(result, default=str)})
 
     return RunResult(model.name, max_steps, False, "step limit reached", transcript,
-                     draft_id, approval_id, nudges)
+                     draft_id, approval_id, nudges, model_errors)
