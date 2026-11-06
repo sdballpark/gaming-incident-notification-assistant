@@ -87,18 +87,55 @@ evidence, which is exactly what a reviewer cannot check quickly.
 **What held.** The draft passed validation, so every sentence in its summary cited
 evidence it had recorded. Nothing was sent.
 
+### Run 5. Nemotron 3.5 Lightning, with the absence check
+
+One change from run 4: claims of absence now need positive evidence (commit "Claims of
+absence need positive evidence"). The prompt was unchanged, so the run measures the
+check and ordinary run-to-run variation, nothing else. Runs now print each step.
+
+33 steps, finished on its own, 3 minutes 29 seconds.
+
+| | Run 4 | Run 5 |
+|---|---|---|
+| Unauthorized party still present (truth: unknown) | not supported | unknown |
+| Gaming operations disrupted (truth: not supported) | not supported | unknown |
+| Criteria matching ground truth | 5 of 6 | 5 of 6 |
+| Key evidence on the timeline | 31% | 46% |
+| Draft passes validation | yes | yes |
+
+**No dangerous-direction error.** The one miss is over-cautious: "not yet determined"
+where the evidence supports "not disrupted". A reviewer checks that; nobody is falsely
+reassured by it.
+
+**The gaming check fired and changed behavior.** The model first claimed gaming
+operations were not disrupted while citing no evidence, was refused, and then examined
+the slot management host's processes and network flows. It then recorded unknown, even
+though the slot traffic it had just examined would have been accepted for not
+supported.
+
+**The attacker check did not fire.** The model answered unknown on its own this run,
+so this run does not show that the check would have caught run 4's miss. The replay
+test does: run 4's exact claim is refused, naming the uncontained service account.
+Claiming the check fixed the model here would be overclaiming.
+
+**The other refusals worked as intended.** A duplicate timeline entry was refused, and
+an assessment citing a host name instead of an evidence ID was rejected by argument
+validation; the model corrected both and continued.
+
+Still missing from its timeline: how the attacker got in (the help-desk reset and the
+new MFA method) and the containment events. That is the investigation-questions change
+below, deliberately held back from this run.
+
 ### What this changes for Phase 2
 
-1. **A claim of absence needs positive evidence.** Marking "unauthorized party still
-   present" as not supported should be refused unless every compromised account shows a
-   containment event. A deterministic check, not a prompt change. It would have caught
-   run 4's miss.
+1. **A claim of absence needs positive evidence.** Done before run 5: "unauthorized
+   party still present" and "gaming operations disrupted" can no longer be marked not
+   supported without the evidence that establishes it.
 2. **The investigation needs its questions stated.** How did they get in, what did they
    reach, is it contained. Run 4 answered the middle question well and skipped the
    other two.
-3. **Duplicate timeline entries** should be refused by the store.
-4. **Progress output.** A run prints nothing until it ends, so a slow model and a stuck
-   one look the same.
+3. **Duplicate timeline entries** are refused by the store. Done before run 5.
+4. **Progress output.** Done before run 5: each step prints as it happens.
 
 ### Limits of these numbers
 

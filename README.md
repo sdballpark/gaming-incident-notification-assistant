@@ -70,13 +70,15 @@ what failed and why, in [docs/BUILD_LOG.md](docs/BUILD_LOG.md); run files in
 | qwen2.5:14b, before fixes | 0/6 | yes | 0% | no | 1m27s |
 | qwen2.5:14b, after fixes | model error | yes | 0% | no | 30s |
 | Nemotron 3.5 Lightning | 5/6 | no | 31% | yes | 4m38s |
+| Nemotron, with the absence check | 5/6 | no | 46% | yes | 3m29s |
 
 The first qwen2.5 run exposed four harness and setup faults, now fixed. After the
 fixes, qwen2.5 failed at producing tool calls: a garbled tag, then a token-repeat loop.
 Nemotron reached five of six conclusions on thin evidence and missed in the dangerous
-direction, reporting that the attacker was gone when that was not yet known. Phase 2
-adds a deterministic check for that class of claim. One scenario and one run per model
-is a smoke test, not a measurement.
+direction, reporting that the attacker was gone when that was not yet known. Claims of
+absence now need positive evidence. On the rerun its one miss was over-cautious instead,
+and a refused claim sent it to examine the gaming systems before answering. One scenario
+and one run per model is a smoke test, not a measurement.
 
 The send path needs two separate human acts. Approval alone is refused when no person
 has recorded the incident as notifiable, and a recorded "not notifiable" blocks the
