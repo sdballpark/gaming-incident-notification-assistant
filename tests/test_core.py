@@ -103,6 +103,34 @@ def test_timeline_tampering_is_detected(store):
     assert not store.verify_timeline(cid)
 
 
+def test_mid_chain_deletion_is_detected(store):
+    cid = _case(store)
+    for ts, e in [("2026-03-14T02:10:00+00:00", "AUD-0001"),
+                  ("2026-03-14T02:18:00+00:00", "SIG-0003"),
+                  ("2026-03-14T02:42:00+00:00", "PRC-0003")]:
+        store.append_timeline(cid, ts, "fact", [e], "a")
+    store.conn.execute("DELETE FROM timeline WHERE seq = 2")
+    assert not store.verify_timeline(cid)
+
+
+def test_activation_time_must_carry_a_timezone(store):
+    with pytest.raises(StoreError, match="timezone"):
+        store.open_case("s01", "2026-03-14T17:15:00", "m.okafor")
+    with pytest.raises(StoreError, match="ISO 8601"):
+        store.open_case("s01", "yesterday afternoon", "m.okafor")
+
+
+def test_assessment_history_is_kept(store):
+    cid = _case(store)
+    store.set_assessment(cid, "attacker_still_present", "unknown", [], "first look", "a")
+    store.set_assessment(cid, "attacker_still_present", "supported", ["SIG-0008"],
+                         "later evidence", "a")
+    assert store.assessments(cid)["attacker_still_present"]["status"] == "supported"
+    rows = store.conn.execute("SELECT status FROM assessments WHERE case_id = ? "
+                              "ORDER BY seq", (cid,)).fetchall()
+    assert [r[0] for r in rows] == ["unknown", "supported"]
+
+
 def test_decision_cannot_be_recorded_by_an_agent_identity(store):
     with pytest.raises(StoreError):
         store.record_decision(_case(store), True, "investigation_agent", "x")

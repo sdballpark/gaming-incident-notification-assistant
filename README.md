@@ -16,6 +16,17 @@ results across a scenario corpus come in Phase 2.
 
 ---
 
+## Documentation
+
+| Document | For |
+|---|---|
+| [Requirements](docs/REQUIREMENTS.md) | What the system must and must never do, traced to Regulation 5.260, code and tests |
+| [Architecture](docs/ARCHITECTURE.md) | Zachman Framework view; context, component, process, information and deployment views; RMF boundary and categorization |
+| [Security view](docs/SECURITY.md) | Trust boundaries, threat model, controls, NIST SP 800-37 and SP 800-53 mapping, NIST AI RMF, OWASP LLM Top 10, residual risks |
+| [Operations guide](docs/OPERATIONS.md) | Install, run, read results, extend, troubleshoot |
+| [Design](DESIGN.md) | The original design and its reasoning |
+| [Build log](docs/BUILD_LOG.md) | Every model run, what failed, and what changed because of it |
+
 ## Why this exists
 
 The 2026 amendment cut the initial notification window from 72 hours to 24, measured

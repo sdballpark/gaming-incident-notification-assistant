@@ -143,3 +143,27 @@ One scenario, one run per model, temperature 0. That is a smoke test, not a
 measurement: it shows whether a model can drive the tools and where it fails, not how
 often. Phase 2 runs a scenario corpus with clean and injected twins, with predictions
 committed before the runs, and reports rates.
+
+---
+
+## 2026-11-07: checking that the tests can fail
+
+A test suite that has never failed proves little, so controls were removed one at a time
+and the suite run against each change, then restored.
+
+| Control removed | Tests that failed |
+|---|---|
+| Decision check in the send handler | 1 |
+| Per-sentence citation rule in the draft validator | 1 |
+| Absence check | 5 |
+| Argument length limits (summary, rationale, query) | 3 |
+| Timezone check on the activation time | 1 |
+| Assessment history (earlier rows deleted on update) | 1 |
+
+An independent review of the documentation against the code found that three
+requirements marked as met cited tests that did not exercise them: argument length
+limits, audit redaction and assessment history. Tests were added for each, along with a
+test that an unknown role is denied and one that a deletion inside the timeline is
+detected. The review also found that a timezone-less activation time was accepted when
+a case opened and only failed later inside a tool call; the case now refuses it. The
+suite went from 52 to 63 tests.

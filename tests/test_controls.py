@@ -65,6 +65,34 @@ def test_bad_arguments_are_rejected_before_any_handler(session):
     assert r["error"] == "validation_failed"
 
 
+@pytest.mark.parametrize("tool, args", [
+    ("draft_initial_notification", {"summary": "x" * 2001}),
+    ("set_criterion_assessment", {"criterion": "compromise", "status": "unknown",
+                                  "rationale": "x" * 1001}),
+    ("search_regulation", {"query": "x" * 201}),
+    ("add_timeline_entry", {"event_time": "2026-03-14T02:10:00+00:00", "summary": "x",
+                            "evidence_ids": ["AUD-0001"] * 21}),
+    ("add_timeline_entry", {"event_time": "not a time", "summary": "x",
+                            "evidence_ids": ["AUD-0001"]}),
+    ("add_timeline_entry", {"event_time": "2026-03-14T02:10:00+00:00", "summary": "x",
+                            "evidence_ids": ["LOY-DB-01"]}),
+])
+def test_oversized_and_malformed_arguments_are_rejected(session, tool, args):
+    assert call(session, tool, args)["error"] == "validation_failed"
+
+
+def test_unknown_role_is_denied(session):
+    r = call(session, "get_case", {}, role="superuser_agent")
+    assert r["error"] == "denied"
+
+
+def test_audit_redacts_secrets_in_arguments(session):
+    token = "bearer " + "A1b2C3d4E5f6G7h8I9j0" * 2
+    call(session, "query_signins", {"source_ip": token})
+    logged = session.gateway.audit.tail(1)[0]["arguments"]
+    assert "A1b2C3d4E5f6G7h8I9j0" not in logged and "[REDACTED]" in logged
+
+
 # ------------------------------------------------------------------ the send path
 
 def test_send_request_does_not_execute(finished):
@@ -119,6 +147,16 @@ def test_draft_shows_unknown_as_not_yet_determined(finished):
     assert "Unauthorized party still present: Not yet determined" in body
     assert "PENDING. To be decided and recorded by a named person." in body
     assert "72 hours" not in body
+
+
+def test_draft_flags_personal_information_for_counsel(finished):
+    """Patron data is in scope in s01, so the draft must point counsel at NRS 603A
+    without drafting a 603A notice itself."""
+    session, result = finished
+    body = session.store.draft(result.draft_id)["body"]
+    assert "NRS 603A" in body and "separate determination for counsel" in body
+    assert session.store.assessments(session.case_id)[
+        "personal_information_involved"]["status"] == "supported"
 
 
 def test_injected_twin_is_flagged_and_changes_nothing(tmp_path):

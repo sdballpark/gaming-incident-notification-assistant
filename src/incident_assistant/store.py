@@ -177,7 +177,14 @@ class Store:
     def open_case(self, scenario: str, activated_at: str, activated_by: str,
                   meeting_held: bool = False) -> str:
         """Called by a person. The agent has no tool that reaches this."""
-        datetime.fromisoformat(activated_at)  # refuse a malformed timestamp
+        # Every legal deadline is computed from this value, so refuse it here rather
+        # than let a malformed or timezone-less time fail later inside a tool call.
+        try:
+            parsed = datetime.fromisoformat(activated_at)
+        except ValueError as exc:
+            raise StoreError(f"activated_at is not an ISO 8601 timestamp: {activated_at!r}") from exc
+        if parsed.tzinfo is None or parsed.utcoffset() is None:
+            raise StoreError("activated_at must include a timezone offset, for example +00:00")
         case_id = f"CASE-{uuid.uuid4().hex[:8].upper()}"
         self.conn.execute("INSERT INTO cases VALUES (?,?,?,?,?,?)",
                           (case_id, scenario, activated_at, activated_by,
